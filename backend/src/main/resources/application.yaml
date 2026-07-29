@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: sales
+
+  datasource:
+    # 環境変数 POSTGRES_URL / USER / PASSWORD があれば上書き
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/agency_db}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+# MyBatis 設定
+mybatis:
+  type-aliases-package: com.agency.sales.domain.model
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true # DBの snake_case を Javaの camelCase に自動変換
+
+# JWT（認証）用カスタムプロパティ
+jwt:
+  secret: ${JWT_SECRET:your-default-dev-secret-key-must-be-long-enough-32bytes}
+  expiration-ms: 86400000 # 24時間 (ミリ秒)
+
