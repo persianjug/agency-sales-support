@@ -2,12 +2,14 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: agency-postgres
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
       POSTGRES_DB: agency_db
-      POSTGRES_USER: ${POSTGRES_USER:postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      TZ: Asia/Tokyo
     volumes:
       - pgdata:/var/lib/postgresql/data
 

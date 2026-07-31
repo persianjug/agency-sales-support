@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.agency.sales.mapper.AccountMapper">
+
+  <select id="findByUsername" resultType="com.agency.sales.domain.Account">
+    SELECT
+      id
+     ,username
+     ,password
+     ,role
+    FROM
+      accounts
+    WHERE
+      username = #{username}
+  </select>
+
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT
+    INTO
+      accounts
+      ( 
+        username
+       ,password
+       ,role
+      )
+    VALUES
+      ( 
+        #{username}
+       ,#{password}
+       ,#{role}
+      )
+  </insert>
+
+</mapper>

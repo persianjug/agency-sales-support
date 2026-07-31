@@ -140,6 +140,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    implementaiton 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -279,12 +283,14 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: agency-postgres
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
       POSTGRES_DB: agency_db
-      POSTGRES_USER: ${POSTGRES_USER:postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      TZ: Asia/Tokyo
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -330,7 +336,8 @@ agency-sales-support/              # プロジェクトルート
     │   │   │   ├── controller/          # REST API コントローラー
     │   │   │   ├── service/             # ビジネスロジック
     │   │   │   ├── mapper/              # MyBatis Mapper インターフェース
-    │   │   │   ├── domain/              # ドメインモデル (Entity, DTO)
+    │   │   │   ├── domain/              # DBエンティティ・ドメインモデル (Entity)
+    │   │   │   ├── dto/                 # APIデータ転送用 (DTO)
     │   │   │   └── security/            # JWT認証フィルター
     │   │   └── resources/
     │   │       ├── mapper/              # MyBatis SQL XML ファイル
