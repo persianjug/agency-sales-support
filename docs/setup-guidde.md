@@ -234,6 +234,12 @@ mybatis:
 jwt:
   secret: ${JWT_SECRET:your-default-dev-secret-key-must-be-long-enough-32bytes}
   expiration-ms: 86400000 # 24時間 (ミリ秒)
+
+# ログレベル変更
+logging:
+  level:
+    # 独自認証(JWT等)使用時に出るSpring Securityの不要なWARNログを抑止（ログレベルを ERROR に上げて非表示にする）
+    "[org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer]": ERROR
 ```
 
 > 💡 **JWT Secret（シークレットキー）の安全な生成コマンド**
@@ -255,8 +261,9 @@ jwt:
 プロジェクト直下に `.env` を配置（※ `.gitignore` に登録して Git 対象外にする）。
 
 ```env
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
+POSTGRES_URL=postgresql://localhost:5432/agency_db
+POSTGRES_USER=(自分で決めたユーザー名)
+POSTGRES_PASSWORD=(自分で決めたパスワード)
 JWT_SECRET=（生成したシークレットキー）
 ```
 
@@ -288,8 +295,8 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_DB: agency_db
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       TZ: Asia/Tokyo
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -297,6 +304,40 @@ services:
 volumes:
   pgdata:
 ```
+
+### VS Code でのローカル起動・デバッグ設定
+
+本プロジェクトはルート直下に `agency-sales-support/backend` などのサブディレクトリを持つ構成になっています。
+VS Code からデバッグ起動（`F5`）する際は、**.env のパス指定** に注意してください。
+
+#### 1. `.vscode/launch.json` の作成
+
+プロジェクトルートの `.vscode/launch.json` に以下の設定を記述します。
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-SalesApplication<backend>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/agency-sales-support/backend",
+      "mainClass": "com.agency.sales.SalesApplication",
+      "projectName": "backend",
+      "args": "",
+      "envFile": "${workspaceFolder}/agency-sales-support/backend/.env"
+    }
+  ]
+}
+```
+
+> **ハマりポイント（注意点）**
+>
+> - ルートディレクトリを VS Code で開いている場合、`"envFile"` に `${workspaceFolder}/backend/.env` と書くと `.env` が読み込まれず、起動時エラー（`Could not resolve placeholder`）が発生します。
+> - 必ずルートからの相対パス（`${workspaceFolder}/agency-sales-support/backend/.env`）を指定してください。
+
+---
 
 ## 6. プロジェクト全体ディレクトリ構成メモ
 

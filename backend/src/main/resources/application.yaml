@@ -12,20 +12,25 @@ spring:
 
   datasource:
     # 環境変数 POSTGRES_URL / USER / PASSWORD があれば上書き
-    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/agency_db}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
 # MyBatis 設定
 mybatis:
-  # type-aliases-package: com.agency.sales.domain
+  type-aliases-package: com.agency.sales.domain
   mapper-locations: classpath:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true # DBの snake_case を Javaの camelCase に自動変換
 
 # JWT（認証）用カスタムプロパティ
 jwt:
-  secret: ${JWT_SECRET:your-default-dev-secret-key-must-be-long-enough-32bytes}
+  secret: ${JWT_SECRET}
   expiration: 86400000 # 24時間 (ミリ秒)
 
+# ログレベル変更
+logging:
+  level:
+    # 独自認証(JWT等)使用時に出るSpring Securityの不要なWARNログを抑止（ログレベルを ERROR に上げて非表示にする）
+    "[org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer]": ERROR
