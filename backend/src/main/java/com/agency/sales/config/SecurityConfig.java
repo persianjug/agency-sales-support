@@ -1,5 +1,7 @@
 package com.agency.sales.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +14,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.agency.sales.service.CustomUserDetailsService;
 
@@ -45,8 +50,10 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
         .authorizeHttpRequests(auth -> auth
             // 認証不要のエンドポイント（ログインAPI、Swagger UI）
             .requestMatchers(
@@ -58,6 +65,36 @@ public class SecurityConfig {
             .anyRequest().authenticated());
 
     return http.build();
+  }
+
+/**
+   * CORS（Cross-Origin Resource Sharing）の設定定義。
+   * Next.js（フロントエンド）からのクロスドメインリクエストを許可する。
+   *
+   * @return CorsConfigurationSource インスタンス
+   */
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    // 許可するオリジン（Next.js の開発サーバーアドレス）
+    // ※環境に合わせて "http://localhost:3000" 等に変更してください
+    configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+
+    // 許可する HTTP メソッド
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+    // 許可するリクエストヘッダー
+    configuration.setAllowedHeaders(List.of("*"));
+
+    // クッキーや Authorization ヘッダーの送信を許可するか（必要に応じて true に設定）
+    configuration.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    // 全てのエンドポイントに CORS 設定を適用
+    source.registerCorsConfiguration("/**", configuration);
+
+    return source;
   }
 
   /**
