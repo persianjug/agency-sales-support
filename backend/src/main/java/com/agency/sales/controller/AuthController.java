@@ -65,6 +65,14 @@ public class AuthController {
             .build();
         accountMapper.insert(admin);
       }
+      if (accountMapper.findByUsername("admin@abc.com").isEmpty()) {
+        Account admin = Account.builder()
+            .username("admin@abc.com")
+            .password(passwordEncoder.encode("password123"))
+            .role(Role.ROLE_ADMIN)
+            .build();
+        accountMapper.insert(admin);
+      }
     };
   }
 
