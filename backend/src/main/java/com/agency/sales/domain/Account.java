@@ -24,4 +24,7 @@ public class Account {
 
   /** アカウントのロール権限 */
   private Role role;
+
+  /** ユーザー表示名 */
+  private String name;
 }

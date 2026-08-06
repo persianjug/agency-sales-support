@@ -9,6 +9,7 @@
      ,username
      ,password
      ,role
+     ,name
     FROM
       accounts
     WHERE
@@ -23,12 +24,14 @@
         username
        ,password
        ,role
+       ,name
       )
     VALUES
       ( 
         #{username}
        ,#{password}
        ,#{role}
+       ,#{name}
       )
   </insert>
 

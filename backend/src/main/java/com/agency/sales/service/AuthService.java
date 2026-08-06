@@ -5,8 +5,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.agency.sales.dto.AuthReponse;
+import com.agency.sales.dto.AuthResponse;
 import com.agency.sales.dto.AuthRequest;
+import com.agency.sales.security.CustomUserDetails;
 import com.agency.sales.security.JwtTokenProvider;
 
 /**
@@ -36,14 +37,20 @@ public class AuthService {
    * @return 生成された JWT トークンを格納した AuthReponse DTO
    * @throws org.springframework.security.core.AuthenticationException 認証に失敗した場合（BadCredentialsException 等）
    */
-  public AuthReponse login(AuthRequest request) {
+  public AuthResponse login(AuthRequest request) {
+    // 1. 認証処理を実行（内部で CustomUserDetailsService が呼ばれる）
     Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
+    // 2. 認証に成功した Principal（CustomUserDetails）を取り出す
+    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+    // 3. トークンの生成
     String role = authentication.getAuthorities().iterator().next().getAuthority();
     String token = tokenProvider.generateToken(request.getUsername(), role);
 
-    return new AuthReponse(token);
+    // 4. レスポンスDTOを生成
+    return new AuthResponse(token, userDetails.getUsername(), userDetails.getName());
   }
 
 }

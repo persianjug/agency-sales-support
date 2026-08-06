@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ControlledInput from "../ui/controlled-input";
-import { useAuthLoginForm } from "@/hooks/use-autu-login-form";
+import { useAuthLoginForm } from "@/hooks/use-auth-login-form";
 import { Separator } from "../ui/separator";
 
 /**

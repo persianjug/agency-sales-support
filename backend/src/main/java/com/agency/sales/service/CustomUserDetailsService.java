@@ -2,12 +2,12 @@ package com.agency.sales.service;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.agency.sales.domain.Account;
 import com.agency.sales.mapper.AccountMapper;
+import com.agency.sales.security.CustomUserDetails;
 
 /**
  * Spring Security の認証処理において、ユーザー情報を DB から取得するためのカスタムサービス実装。
@@ -37,13 +37,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     Account account = accountMapper.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("Account not found: " + username));
 
-    return (
-      User
-        .withUsername(account.getUsername())
-        .password(account.getPassword())
-        .roles(account.getRole().name().replace("ROLE_", ""))
-        .build()
-    );
+    return new CustomUserDetails(account);
   }
 
 }
