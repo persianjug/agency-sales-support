@@ -1,45 +1,11 @@
 'use server'
 
-import { cookies } from 'next/headers';
 import { authLoginSchema, AuthLoginFormValues } from '@/lib/validations/auth';
 import { SpringBootAuthResponse, SpringBootErrorResponse, AuthLoginResult, } from '@/types/api/auth';
 import { AUTH_MESSAGES } from '@/constants/messages';
-import { AUTH_TOKEN_COOKIE_KEY } from '@/constants/auth';
 import { apiClient } from '@/lib/api-Client';
-
-/**
- * 認証トークン（JWT等）を Cookie に保存する非同期関数
- *
- * @param token - Spring Boot から返却された認証トークン文字列
- * @returns Promise<void>
- *
- * @remarks
- * - XSS 対策のため `httpOnly: true` を設定し、クライアント JavaScript からの操作を防止します。
- * - 本番環境（`NODE_ENV === 'production'`）では HTTPS 通信時のみ送信されるよう `secure: true` を有効化します。
- * - アプリケーション全体の全パス（`/` 以下）で Cookie が送信されるよう `path: '/'` を設定しています。
- */
-const saveSessionCookie = async (token: string): Promise<void> => {
-  const cookieStore = await cookies();
-
-  cookieStore.set(AUTH_TOKEN_COOKIE_KEY, token, {
-    // JavaScriptからのCoookieアクセス不可にする（XSS対策）
-    httpOnly: true,
-
-    // 本番環境ではセキュア通信（https）を強制
-    // [NODE_ENV]は開発環境実行（npm run dev）で `development` を自動設定
-    // [NODE_ENV]は本番環境実行（npm run start）で `production` を自動設定
-    secure: process.env.NODE_ENV === 'production',
-
-    // 同一サイト、他サイトからのリンク遷移（GET）からはCookie送信
-    sameSite: 'lax',
-
-    // サイト全体のすべてのパス（/以下）でこのCookieを有効化する
-    // 例: /api/auth/loginでアクセスした場合、/api/auth/login 配下へのアクセス -> Cookie が送信される
-    // /dashboard や /profile へのアクセス -> Cookie が送信されない（未ログイン扱いになる！）
-    // となる場合を防止するため、ルート（/）をしてアプリ全体でCookie送信できるようにする
-    path: '/',
-  })
-}
+import { deleteSessionCookie, saveSessionCookie } from '@/lib/auth-cookie';
+import { AUTH_TOKEN_COOKIE_KEY, USER_EMAIL_COOKIE_KEY, USER_NAME_COOKIE_KEY } from '@/constants/auth';
 
 /**
  * Spring Boot のログイン認証 API を呼び出す内部ヘルパー関数
@@ -118,12 +84,51 @@ export const authLoginAction = async (
       }
     }
 
+    console.log(`${JSON.stringify(Response)}`);
+
     // 3. 正常系：Cookie にセッション（JWT）をセット
-    await saveSessionCookie(apiResponse.token);
+    await saveSessionCookie([
+      {
+        name: AUTH_TOKEN_COOKIE_KEY,
+        value: apiResponse.token,
+        options: { httpOnly: true }, // JWT は JS から見えないよう保護
+      },
+      {
+        name: USER_EMAIL_COOKIE_KEY,
+        value: apiResponse.username,
+        options: { httpOnly: false },
+      },
+      {
+        name: USER_NAME_COOKIE_KEY,
+        value: apiResponse.name,
+        options: { httpOnly: false },
+      },
+    ]);
 
     return { success: true }
   } catch (error) {
     console.error('Login Action Error:', error);
+    return {
+      success: false,
+      message: AUTH_MESSAGES.NETWORK_ERROR,
+    }
+  }
+}
+
+/**
+ * ユーザーログアウト処理を行う Server Action
+ *
+ * @returns 処理結果オブジェクト
+ *
+ * @remarks
+ * - Cookie 内の認証トークン（JWT）を削除（`deleteSessionCookie`）します。
+ */
+export const authLogoutAction = async () => {
+  try {
+    await deleteSessionCookie();
+    return { success: true }
+  } catch (error) {
+    console.error('Logout Action Error:', error)
     return {
       success: false,
       message: AUTH_MESSAGES.NETWORK_ERROR,

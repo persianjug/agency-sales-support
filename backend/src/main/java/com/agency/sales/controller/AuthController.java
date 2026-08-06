@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.agency.sales.domain.Account;
 import com.agency.sales.domain.Role;
-import com.agency.sales.dto.AuthReponse;
+import com.agency.sales.dto.AuthResponse;
 import com.agency.sales.dto.AuthRequest;
 import com.agency.sales.mapper.AccountMapper;
 import com.agency.sales.service.AuthService;
@@ -41,8 +41,8 @@ public class AuthController {
    * @return 発行された JWT トークンを含むレスポンス DTO
    */
  @PostMapping("/login")
-  public ResponseEntity<AuthReponse> login(@RequestBody AuthRequest request) {
-    AuthReponse reponse = authService.login(request);
+  public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    AuthResponse reponse = authService.login(request);
     return ResponseEntity.ok(reponse);
   }
 

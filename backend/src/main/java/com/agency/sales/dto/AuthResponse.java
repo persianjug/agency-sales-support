@@ -8,7 +8,13 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class AuthReponse {
+public class AuthResponse {
   /** 発行された JWT トークン文字列 */
   private String token;
+
+  /** ユーザーID（メールアドレス） */
+  private String username;
+
+  /** ユーザー表示名 */
+  private String name;
 }

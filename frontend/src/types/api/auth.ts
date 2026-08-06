@@ -3,7 +3,11 @@
  */
 export type SpringBootAuthResponse = {
   /** 認証トークン（JWT等） */
-  token: string
+  token: string,
+  /** ユーザーID（メールアドレス) */
+  username: string,
+  /** ユーザー名 */
+  name: string,
 }
 
 /**
