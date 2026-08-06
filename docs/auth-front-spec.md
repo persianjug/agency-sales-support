@@ -6,7 +6,7 @@
 
 ### 1.1 目的
 
-本仕様書は、Next.js（App Router）における認証・認可処理、JWT Cookieを用いたセッション管理、および保護された領域（ダッシュボード等）へのルーティング制御・UI連携の仕様を定義します。
+本仕様書は、Next.js（App Router）における認証・認可処理、JWT およびユーザー情報 Cookie を用いたセッション管理、保護された領域（ダッシュボード等）へのルーティング制御、ログアウト機能、および UI 連携の仕様を定義します。
 
 ### 1.2 システム構成（フロントエンド側）
 
@@ -17,9 +17,9 @@
 - **フォーム管理**:
   - `react-hook-form`, `zod`
 - **状態管理/通信**:
-  - Server Actions, Custom Hooks (`useAuthLoginForm`)
+  - Server Actions, Custom Hooks (`useAuthLoginForm`, `useAuthLogout`, `useCurrentUser`)
 - **認証方式**:
-  - Cookie ベースのステートレス JWT 認証
+  - Cookie ベースのステートレス JWT 認証 ＋ 表示用 Cookie 連携
 
 ---
 
@@ -27,13 +27,21 @@
 
 ### 2.1 セッション管理（Cookie）
 
-- **トークンキー**:
-  - `auth_token`
-- **保存形式**:
-  - HTTP Cookie (`httpOnly: true`, `sameSite: 'lax'`, `path: '/'`)
+認証トークン（JWT）に加えて、クライアント側でユーザー情報を表示するための Cookie を一括管理します。
+
+| Cookie キー | 設定値 | `httpOnly` | `sameSite` | 用途 |
+| --- | --- | --- | --- | --- |
+| `auth_token` | JWT トークン | `true` | `lax` | API 認証用トークン（JS 閲覧不可） |
+| `user_email` | ユーザーID (メールアドレス) | `false` | `lax` | UI 表示用（ヘッダーアバター等） |
+| `user_name` | ユーザー表示名 | `false` | `lax` | UI 表示用（ヘッダーアバター等） |
+
+- **共通保存処理 (`saveSessionCookie`)**:
+  - Server Action 内で `CookieItem[]` 配列を受け取り、ループ処理にて一括で Cookie をセットします。
+
 - **ライフサイクル**:
-  - ログイン成功時：Server Action 経由で Cookie に JWT を保存
-  - ログアウト時：Cookie を削除（※Sprint 4実装予定）
+  - **ログイン成功時**: Spring Boot 側の `AuthResponse` から受け取った `トークン(token)`, `ユーザーID(username)`, `ユーザー表示名(name)` を各 Cookie に保存。
+
+  - **ログアウト時**: Server Action (`authLogoutAction`) 経由で全セッション Cookie (`auth_token`, `user_email`, `user_name`) を一括削除。
 
 ### 2.2 アクセス制御マトリクス
 
@@ -53,22 +61,31 @@
 ```text
 src/
 ├── actions/
-│   └── auth.ts             # Server Actions (authLoginAction)
+│   └── auth.ts                 # Server Actions (authLoginAction, authLogoutAction)
 ├── app/
 │   ├── (auth)/
-│   │   └── login/         # ログインページ
+│   │   └── login/             # ログインページ
 │   └── (dashboard)/
-│        └── page.tsx/      # ダッシュボード (保護ページ)
+│       ├── layout.tsx          # ダッシュボード共通レイアウト (Header 配置)
+│       └── page.tsx            # ダッシュボード (保護ページ)
 ├── components/
 │   ├── auth/
-│   │   └── auth-login-form.tsx # ログインフォームUI
+│   │   └── auth-login-form.tsx # ログインフォーム UI
+│   ├── layout/
+│   │   ├── header.tsx          # アプリ共通ヘッダー
+│   │   ├── header-logo.tsx     # ヘッダーロゴ
+│   │   └── user-nav.tsx        # ユーザーアバター＆ドロップダウンメニュー (カード型)
 │   └── ui/
 │       └── controlled-input.tsx # 共通制御入力 (パスワード表示切替機能内蔵)
 ├── hooks/
-│   └── use-auth-login-form.ts  # ログインフォーム状態管理フック
+│   ├── use-auth-login-form.ts  # ログインフォーム状態管理フック
+│   ├── use-auth-logout.ts      # ログアウト処理フック
+│   └── use-current-user.ts     # Cookie からのユーザー情報取得フック
+├── lib/
+│   └── auth-cookie.ts          # Cookie 操作共通関数 (saveSessionCookie, deleteSessionCookie)
 ├── constants/
-│   └── auth.ts             # Cookieキー、パス定義定数
-└── middleware.ts           # 認証・認可ミドルウェア (※配置場所に注意)
+│   └── auth.ts                 # Cookie キー、パス定義定数
+└── middleware.ts               # 認証・認可ミドルウェア
 
 ```
 
@@ -87,6 +104,26 @@ src/
 #### 3.2.3.  **`middleware.ts` (`src/middleware.ts`)**
 
 - リクエスト毎に `auth_token` Cookie の有無を検証し、保護パスおよび公開パスへのアクセスを制御する。
+
+#### 3.2.5. **`saveSessionCookie` / `deleteSessionCookie` (`src/lib/auth-cookie.ts`)**
+
+- Cookie の保存・削除を一括管理するユーティリティ関数。
+- `CookieItem[]`（オブジェクト配列）を受け取ることで、複数の Cookie 設定を一括ループ処理可能。
+
+#### 3.2.6. **`useCurrentUser` (`src/hooks/use-current-user.ts`)**
+
+- クライアント側（`js-cookie`）で Cookie から `user_name` と `user_email` を取得するカスタムフック。
+- `useEffect` を用いることで SSR 時のハイドレーションミスマッチを防ぎます。
+
+#### 3.2.7. **`UserNav` (`src/components/layout/user-nav.tsx`)**
+
+- ヘッダー右上に配置されるユーザーアバターアイコンおよびドロップダウンメニュー。
+- ドロップダウン内部は上部に「大型アバター＋名前＋メールアドレス」をまとめたアカウントカード、下部にマイページやログアウトボタンを配置した Microsoft 風 UI を採用。
+
+#### 3.2.8. **`useAuthLogout` (`src/hooks/use-auth-logout.ts`)**
+
+- `useTransition` を使用してログアウト中のローディング状態（`isPending`）を管理。
+- `authLogoutAction` を呼び出して Cookie を全削除後、Sonner トースト表示とともに `router.push('/login')` および `router.refresh()` を実行。
 
 ---
 
@@ -155,6 +192,31 @@ sequenceDiagram
 
 ```
 
+### 4.3 ログアウト実行フロー
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as ユーザー
+    participant Nav as UserNav Component
+    participant Hook as useAuthLogout Hook
+    participant Action as Server Action<br/>(authLogoutAction)
+    participant Cookie as Browser Cookie
+    participant App as Next.js Router
+
+    User->>Nav: アバターメニューから「ログアウト」をクリック
+    Nav->>Hook: handleLogout() 実行
+    Note over Hook: isPending = true (ボタン非活性化・ローディング表記)
+    Hook->>Action: authLogoutAction() 呼び出し
+    Action->>Cookie: deleteSessionCookie() (auth_token, user_email, user_name 削除)
+    Action-->>Hook: { success: true } 返却
+    Hook->>User: 成功トースト表示 ("ログアウトしました")
+    Hook->>App: router.push('/login') 実行
+    Hook->>App: router.refresh() 実行 (サーバーコンポーネント状態最新化)
+    App-->>User: ログイン画面 (/login) を表示
+
+```
+
 ---
 
 ## 5. 開発時の留意事項・ハマりどころ（Pitfalls & Best Practices）
@@ -185,5 +247,10 @@ sequenceDiagram
 
 - **罠**: Cookie を利用した認証通信を行う場合、Spring Boot 側の SecurityConfig で `allowedOrigins("*")` を設定しているとブラウザが Security エラーで通信を遮断する。
 - **対策**: `allowCredentials(true)` を有効化し、`allowedOrigins` には `http://localhost:3000` などの具体的な送信元オリジンを明示的に指定すること。
+
+### ⑥ クライアントコンポーネントでの Cookie 取得と SSR ハイドレーション
+
+- **罠**: クライアントコンポーネントで直接 `Cookies.get()` して初期値にセットすると、サーバーレンダリング時（Cookie 読み取り不可）とクライアントハイドレーション時で DOM にギャップが生じ、Hydration Error が発生する。
+- **対策**: `useCurrentUser` 内のように、初期状態は空文字列にしておき `useEffect` 内で Cookie を取得・セットすること。
 
 ---
