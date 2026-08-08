@@ -33,3 +33,13 @@ export type AuthLoginResult = {
   /** エラーメッセージ（失敗時のみセットされる / 任意） */
   message?: string,
 }
+
+/**
+ * フロントエンド（Server Action / コンポーネント）側で扱うサインアップ処理結果の型定義
+ */
+export type AuthSignupResult = {
+  /** ログイン処理が成功したかどうか */
+  success: boolean,
+  /** エラーメッセージ（失敗時のみセットされる / 任意） */
+  message?: string,
+}

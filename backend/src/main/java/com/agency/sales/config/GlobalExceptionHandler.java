@@ -21,6 +21,18 @@ public class GlobalExceptionHandler {
   private static final ZoneId JST_ZONE = ZoneId.of("Asia/Tokyo");
 
   /**
+   * バリデーションエラーや不正な引数例外をハンドリング（400 Bad Request）。
+   * ユーザー重複時などに呼び出される。
+   *
+   * @param e 発生した例外オブジェクト
+   * @return 400 ステータスと例外メッセージを含むエラー詳細レスポンス
+   */
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+    return createErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+  }
+
+  /**
    * 認証失敗系の例外をハンドリング（401 Unauthorized）。
    * ユーザー不在、パスワード不一致の場合に呼び出される。
    *
@@ -47,7 +59,7 @@ public class GlobalExceptionHandler {
   /**
    * 共通のエラーレスポンス（ErrorResponse DTO）を生成する内部メソッド。
    *
-   * @param status HTTPステータスコード
+   * @param status  HTTPステータスコード
    * @param message ユーザー向けエラーメッセージ
    * @return レスポンスエンティティ
    */
