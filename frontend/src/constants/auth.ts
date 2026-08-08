@@ -8,11 +8,11 @@ export const USER_EMAIL_COOKIE_KEY = 'user_email';
 export const USER_NAME_COOKIE_KEY = 'user_name';
 
 // 未ログイン状態でもアクセスを許可する公開パス
-export const PUBLIC_PATHS = ['/login', '/register'];
+export const PUBLIC_PATHS = ['/login', '/signup'];
 
 // パスに関する定数
 export const ROUTES = {
   LOGIN: '/login',
-  REGISTER: '/register',
+  SIGNUP: '/signup',
   HOME: '/',
 } as const;
