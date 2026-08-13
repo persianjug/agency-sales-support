@@ -1,5 +1,3 @@
-"use client"
-
 import AuthLoginForm from "@/components/auth/auth-login-form";
 
 const LoginForm = () => {

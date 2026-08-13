@@ -61,3 +61,69 @@ export const authSignupSchema = z
  * `authSignupSchema` から `z.infer` を使用して推論された型です。
  */
 export type AuthSignupFormValues = z.infer<typeof authSignupSchema>
+
+/**
+ * パスワード変更フォーム入力値のバリデーションスキーマ
+ *
+ * @remarks
+ * 各フィールドの検証ルール:
+ * - `currentPassword`: 現在のパスワード（入力必須）
+ * - `newPassword`: 新しいパスワード（8文字以上）
+ * - `confirmPassword`: 確認用新しいパスワード（入力必須）
+ * - 新しいパスワードと確認用パスワードの一致チェック
+ * - 現在のパスワードと新しいパスワードが異なるかのチェック
+ */
+export const authChangePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(1, { message: "現在のパスワードを入力してください" }),
+    newPassword: z
+      .string()
+      .min(8, { message: "新しいパスワードは8文字以上で入力してください" }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "確認用パスワードを入力してください" }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "新しいパスワードが一致しません",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "現在のパスワードとは異なるパスワードを設定してください",
+    path: ["newPassword"],
+  });
+
+/**
+ * パスワード変更フォームの入力値を表す TypeScript の型定義
+ */
+export type AuthChangePasswordFormValues = z.infer<typeof authChangePasswordSchema>;
+
+/**
+ * パスワード忘れ申請フォーム入力値のバリデーションスキーマ
+ */
+export const authForgotPasswordSchema = z.object({
+  email: z
+    .email({ message: "正しいメールアドレス形式で入力してください" }),
+});
+
+export type AuthForgotPasswordFormValues = z.infer<typeof authForgotPasswordSchema>;
+
+/**
+ * パスワード再設定フォーム入力値のバリデーションスキーマ
+ */
+export const authResetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, { message: "新しいパスワードは8文字以上で入力してください" }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "確認用パスワードを入力してください" }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "新しいパスワードが一致しません",
+    path: ["confirmPassword"],
+  });
+
+export type AuthResetPasswordFormValues = z.infer<typeof authResetPasswordSchema>;

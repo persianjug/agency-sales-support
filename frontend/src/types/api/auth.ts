@@ -43,3 +43,62 @@ export type AuthSignupResult = {
   /** エラーメッセージ（失敗時のみセットされる / 任意） */
   message?: string,
 }
+
+/**
+ * フロントエンド側で扱うパスワード変更処理結果の型定義
+ */
+export type AuthChangePasswordResult = {
+  /** 処理が成功したかどうか */
+  success: boolean;
+  /** エラーメッセージ（失敗時のみセットされる） */
+  message?: string;
+};
+
+
+/**
+ * パスワード変更 API のリクエストボディ型定義
+ */
+export type SpringBootChangePasswordRequest = {
+  /** 現在のパスワード */
+  currentPassword: string;
+  /** 新しいパスワード */
+  newPassword: string;
+};
+
+/**
+ * パスワード忘れ申請 API のリクエストボディ型定義
+ */
+export type SpringBootForgotPasswordRequest = {
+  /** ユーザー名（メールアドレス） */
+  username: string;
+};
+
+/**
+ * パスワード再設定 API のリクエストボディ型定義
+ */
+export type SpringBootResetPasswordRequest = {
+  /** ワンタイムトークン */
+  token: string;
+  /** 新しいパスワード */
+  newPassword: string;
+};
+
+/**
+ * パスワード忘れ申請処理結果の型定義
+ */
+export type AuthForgotPasswordResult = {
+  /** 処理が成功したかどうか */
+  success: boolean;
+  /** エラーメッセージ（失敗時のみセットされる） */
+  message?: string;
+}
+
+/**
+ * パスワード再設定処理結果の型定義
+ */
+export type AuthResetPasswordResult = {
+  /** 処理が成功したかどうか */
+  success: boolean;
+  /** エラーメッセージ（失敗時のみセットされる） */
+  message?: string;
+}

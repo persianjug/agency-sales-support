@@ -16,6 +16,19 @@
       username = #{username}
   </select>
 
+  <select id="findById" resultType="com.agency.sales.domain.Account">
+    SELECT
+      id
+     ,username
+     ,password
+     ,role
+     ,name
+    FROM
+      accounts
+    WHERE
+      id = #{id}
+  </select>
+
   <insert id="insert" useGeneratedKeys="true" keyProperty="id">
     INSERT
     INTO
@@ -34,5 +47,14 @@
        ,#{name}
       )
   </insert>
+
+  <update id="updatePassword">
+    UPDATE
+      accounts
+    SET
+      password = #{password}
+    WHERE
+      id = #{id}
+  </update>
 
 </mapper>

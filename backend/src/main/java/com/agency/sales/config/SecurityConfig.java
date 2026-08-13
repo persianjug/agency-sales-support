@@ -2,6 +2,7 @@ package com.agency.sales.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +29,26 @@ import com.agency.sales.service.CustomUserDetailsService;
 @EnableWebSecurity
 public class SecurityConfig {
 
+  /** 認証不要（パブリック）なエンドポイント一覧 */
+  private static final String[] PUBLIC_ENDPOINTS = {
+      "/api/v1/auth/**",
+      "/v3/api-docs/**",
+      "/swagger-ui/**",
+      "/swagger-ui.html"
+  };
+
+  /** CORSで許可する HTTP メソッド */
+  private static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
+
+  /** CORSで許可するリクエストヘッダー（全許可） */
+  private static final List<String> ALLOWED_HEADERS = List.of(CorsConfiguration.ALL);
+
+  // Spring Security の認証処理において、ユーザー情報を DB から取得するためのカスタムサービス
   private final CustomUserDetailsService userDetailsService;
+
+  // 許可するオリジン
+  @Value("${cors.allowed-origins}")
+  private List<String> allowedOrigins;
 
   /**
    * コンストラクタ
@@ -55,19 +75,13 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider())
         .authorizeHttpRequests(auth -> auth
-            // 認証不要のエンドポイント（ログインAPI、Swagger UI）
-            .requestMatchers(
-                "/api/v1/auth/**",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html")
-            .permitAll()
+            .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
             .anyRequest().authenticated());
 
     return http.build();
   }
 
-/**
+  /**
    * CORS（Cross-Origin Resource Sharing）の設定定義。
    * Next.js（フロントエンド）からのクロスドメインリクエストを許可する。
    *
@@ -77,21 +91,20 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
-    // 許可するオリジン（Next.js の開発サーバーアドレス）
-    // ※環境に合わせて "http://localhost:3000" 等に変更してください
-    configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+    // 環境変数・設定ファイルから取得した許可するオリジンをセット
+    configuration.setAllowedOrigins(allowedOrigins);
 
     // 許可する HTTP メソッド
-    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedMethods(ALLOWED_METHODS);
 
     // 許可するリクエストヘッダー
-    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowedHeaders(ALLOWED_HEADERS);
 
     // クッキーや Authorization ヘッダーの送信を許可するか（必要に応じて true に設定）
     configuration.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     // 全てのエンドポイントに CORS 設定を適用
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
 
     return source;

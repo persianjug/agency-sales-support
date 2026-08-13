@@ -14,6 +14,8 @@ import com.agency.sales.security.CustomUserDetails;
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
+
+  // アカウントマッパー
   private final AccountMapper accountMapper;
 
   /**

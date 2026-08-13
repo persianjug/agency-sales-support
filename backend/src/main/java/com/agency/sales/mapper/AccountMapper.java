@@ -18,10 +18,25 @@ public interface AccountMapper {
   Optional<Account> findByUsername(String username);
 
   /**
+   * アカウントIDに基づいてアカウント情報を1件取得します。
+   *
+   * @param id 検索対象のアカウントID
+   * @return 該当アカウント（存在しない場合は Optional.empty）
+   */
+  Optional<Account> findById(Long id);
+
+  /**
    * アカウント情報を新規登録します。
    * ID は DB 側で採番（Auto Increment）されます。
    *
    * @param account 登録用アカウントドメインオブジェクト
    */
   void insert(Account account);
+
+  /**
+   * アカウントのパスワード情報を更新します。
+   *
+   * @param account 更新対象のアカウントドメインオブジェクト
+   */
+  void updatePassword(Account account);
 }
