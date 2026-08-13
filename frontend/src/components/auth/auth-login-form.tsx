@@ -11,6 +11,7 @@ import {
 import ControlledInput from "../ui/controlled-input";
 import { useAuthLoginForm } from "@/hooks/use-auth-login-form";
 import { Separator } from "../ui/separator";
+import { ROUTES } from "@/constants/auth";
 
 /**
  * ログインフォーム・コンポーネント
@@ -29,7 +30,8 @@ const AuthLoginForm = () => {
     // <div className="flex flex-col gap-4">
     <Card className="w-full sm:max-w-sm [--card-spacing:--spacing(8)]">
       <CardHeader>
-        <CardTitle className="text-3xl font-bold text-center tracking-[0.5rem] pl-2">LOGIN</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center tracking-[0.5rem] pl-2">LOGIN</CardTitle>
+        <Separator className="my-2.5" />
       </CardHeader>
 
       <CardContent>
@@ -39,8 +41,7 @@ const AuthLoginForm = () => {
               <ControlledInput
                 control={form.control}
                 name="email"
-                // label="メールアドレス"
-                label="Email"
+                label="メールアドレス"
                 type="email"
                 placeholder="m@example.com"
                 autoComplete="email"
@@ -51,15 +52,14 @@ const AuthLoginForm = () => {
               <ControlledInput
                 control={form.control}
                 name="password"
-                // label="パスワード"
-                label="Password"
+                label="パスワード"
                 type="password"
                 placeholder=""
                 autoComplete="current-password"
               />
               <div className="flex justify-end">
                 <a
-                  href="#"
+                  href={ROUTES.FORGOT_PASSWORD}
                   className="text-xs text-muted-foreground underline-offset-4 hover:underline"
                 >
                   パスワードをお忘れですか？
@@ -84,7 +84,7 @@ const AuthLoginForm = () => {
 
         <div className="text-center text-xs text-muted-foreground">
           アカウントをお持ちでないですか？{" "}
-          <a href="/signup" className="underline underline-offset-4 hover:text-primary">
+          <a href={ROUTES.SIGNUP} className="underline underline-offset-4 hover:text-primary">
             新規登録
           </a>
         </div>

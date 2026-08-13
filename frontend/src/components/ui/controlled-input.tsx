@@ -3,7 +3,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Button } from "./button"
-import { Eye, EyeOff } from "lucide-react"
+import { AlertCircle, Eye, EyeOff } from "lucide-react"
 
 /**
  * `ControlledInput` コンポーネントの Props 定義
@@ -11,7 +11,7 @@ import { Eye, EyeOff } from "lucide-react"
  * @template T - react-hook-form で管理するフォーム値の型（`FieldValues` を継承）
  */
 type ControlledInputProps<T extends FieldValues> = {
-/** react-hook-form の `useForm` から取得した `control` オブジェクト */
+  /** react-hook-form の `useForm` から取得した `control` オブジェクト */
   control: Control<T>
   /** フォームフィールドの識別名（フォーム型 `T` のキー構造に安全に準拠するパス） */
   name: Path<T>
@@ -23,6 +23,8 @@ type ControlledInputProps<T extends FieldValues> = {
   placeholder?: string
   /** ブラウザの自動補完挙動を制御する autoComplete 属性 */
   autoComplete?: string
+  /** 読み取り専用フラグ（デフォルト: `false`） */
+  readOnly?: boolean
 }
 
 /**
@@ -35,7 +37,8 @@ type ControlledInputProps<T extends FieldValues> = {
  * @remarks
  * - `Controller` を介してフォーム状態をアタッチし、バリデーションエラー時には自動で `FieldError` を描画します。
  * - `type="password"` が指定された場合、パスワードの表示/非表示を切り替えるトグルボタンを自動的に配置します。
- * - アクセシビリティ対応として `aria-invalid` および `htmlFor`/`id` の紐付けを行っています。
+ * - `readOnly={true}` が指定された場合、ユーザーによる編集を制限し、読み取り専用スタイルの視覚フィードバックを適用します。
+* - アクセシビリティ対応として `aria-invalid` および `htmlFor`/`id` の紐付けを行っています。
  */
 const ControlledInput = <T extends FieldValues>({
   control,
@@ -44,6 +47,7 @@ const ControlledInput = <T extends FieldValues>({
   type = "text",
   placeholder,
   autoComplete,
+  readOnly = false,
 }: ControlledInputProps<T>) => {
   // パスワードの表示/非表示状態を管理する State
   const [showPassword, setShowPassword] = useState(false);
@@ -59,8 +63,11 @@ const ControlledInput = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={`field-${name}`} className={"font-semibold"}>
+        // className="gap-1.5" で Field 内部の要素間隔を直接キュッと詰める
+        <Field data-invalid={fieldState.invalid} className="gap-1.5">
+          {/* font-semibold から font-medium に少し落とし、エラー時もラベルの色を落ち着かせる */}
+          {/* <FieldLabel htmlFor={`field-${name}`} className={"font-semibold"}> */}
+          <FieldLabel htmlFor={`field-${name}`} className="font-medium text-xs text-foreground">
             {label}
           </FieldLabel>
 
@@ -74,7 +81,12 @@ const ControlledInput = <T extends FieldValues>({
               placeholder={placeholder}
               autoComplete={autoComplete}
               // パスワード型の場合はアイコンと重ならないよう右側に余白（pr-10）を確保
-              className={isPasswordType ? "pr-10" : ""}
+              className={`
+                /* フォーカス時のリングの太さを細く統一（1px） */
+                focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0
+                ${isPasswordType ? "pr-10" : ""}
+                ${readOnly ? "bg-muted/50 cursor-not-allowed select-none focus-visible:ring-0" : ""}
+              `.trim()}
             />
 
             {/* type="password" の場合のみ切替ボタンを描画 */}
@@ -96,8 +108,18 @@ const ControlledInput = <T extends FieldValues>({
             )}
           </div>
 
-          {fieldState.invalid && (
+          {/* {fieldState.invalid && (
             <FieldError errors={[fieldState.error]} />
+          )} */}
+          {fieldState.invalid && (
+            <div
+              id={`field-${name}-error`}
+              role="alert"
+              className="flex items-center gap-1 text-[10px] sm:text-[11px] font-normal text-destructive leading-none -mt-0.5">
+              <AlertCircle className="h-3 w-3 shrink-0" />
+              {/* FieldError の代わりに直でエラーメッセージを描画してスタイルを完全制御する */}
+              <span>{fieldState.error?.message}</span>
+            </div>
           )}
         </Field>
       )}

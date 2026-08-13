@@ -1,5 +1,3 @@
-"use client"
-
 import AuthSignupForm from "@/components/auth/auth-signup-form";
 
 const SignupForm = () => {

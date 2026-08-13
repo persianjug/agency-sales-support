@@ -13,5 +13,15 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: agency-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP ポート（Spring Bootからの送信先）
+      - "8025:8025" # Web UI ポート（ブラウザでメール確認）
+    environment:
+      MP_TIMEZONE: Asia/Tokyo
+
 volumes:
   pgdata:

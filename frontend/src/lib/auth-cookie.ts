@@ -60,3 +60,25 @@ export const deleteSessionCookie = async (): Promise<void> => {
   cookieStore.delete(USER_NAME_COOKIE_KEY);
 }
 
+/**
+ * 指定した名前の Cookie の値を取得するサーバー側ヘルパー関数
+ *
+ * @param key - 取得対象の Cookie 名（キー）
+ * @returns Promise<string> - Cookie の値（存在しない場合は空文字 `""`）
+ */
+export const getCookieValue = async (key: string): Promise<string> => {
+  const cookieStore = await cookies();
+  return cookieStore.get(key)?.value || "";
+}
+
+/**
+ * 初期表示用のメールアドレスを Cookie から取得するサーバー側ヘルパー関数
+ *
+ * @returns Promise<string> - Cookie に保存されているメールアドレス（存在しない場合は空文字 `""`）
+ *
+ * @remarks
+ * - `page.tsx` (Server Component) などのサーバー側で呼び出し、Client Component へ `props` 渡しするために使用します。
+ */
+export const getInitialEmailCookie = async (): Promise<string> => {
+  return await getCookieValue(USER_EMAIL_COOKIE_KEY);
+}
