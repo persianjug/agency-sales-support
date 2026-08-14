@@ -6,7 +6,7 @@
 
 ### 1.1 目的
 
-本仕様書は、Next.js（App Router）における認証・認可処理、JWT およびユーザー情報 Cookie を用いたセッション管理、保護された領域（ダッシュボード等）へのルーティング制御、ログアウト機能、および UI 連携の仕様を定義します。
+本仕様書は、Next.js（App Router）における認証・認可処理、JWT およびユーザー情報 Cookie を用いたセッション管理、保護領域（ダッシュボード・各種設定等）へのルーティング制御、各認証画面（ログイン、新規登録、パスワード変更、パスワード再設定）と Spring Boot REST API との連携仕様を定義します。
 
 ### 1.2 システム構成（フロントエンド側）
 
@@ -17,7 +17,7 @@
 - **フォーム管理**:
   - `react-hook-form`, `zod`
 - **状態管理/通信**:
-  - Server Actions, Custom Hooks (`useAuthLoginForm`, `useAuthLogout`, `useCurrentUser`)
+  - Server Actions, Custom Hooks (`useAuthLoginForm`, `useAuthSignupForm`, `useChangePasswordForm`, `useForgotPasswordForm`, `useResetPasswordForm`, `useAuthLogout`, `useCurrentUser`)
 - **認証方式**:
   - Cookie ベースのステートレス JWT 認証 ＋ 表示用 Cookie 連携
 
@@ -39,9 +39,11 @@
   - Server Action 内で `CookieItem[]` 配列を受け取り、ループ処理にて一括で Cookie をセットします。
 
 - **ライフサイクル**:
-  - **ログイン成功時**: Spring Boot 側の `AuthResponse` から受け取った `トークン(token)`, `ユーザーID(username)`, `ユーザー表示名(name)` を各 Cookie に保存。
+  - **ログイン成功時**:
+    - Spring Boot 側の `AuthResponse` から受け取った `トークン(token)`, `ユーザーID(username)`, `ユーザー表示名(name)` を各 Cookie に保存。
 
-  - **ログアウト時**: Server Action (`authLogoutAction`) 経由で全セッション Cookie (`auth_token`, `user_email`, `user_name`) を一括削除。
+  - **ログアウト時**:
+    - Server Action (`authLogoutAction`) 経由で全セッション Cookie (`auth_token`, `user_email`, `user_name`) を一括削除。
 
 ### 2.2 アクセス制御マトリクス
 
@@ -49,7 +51,10 @@
 | --- | --- | --- | --- |
 | `/login` | 公開パス (`PUBLIC_PATHS`) | アクセス可 | **`/`（ホーム）へ自動リダイレクト** |
 | `/signup` | 公開パス (`PUBLIC_PATHS`) | アクセス可 | **`/`（ホーム）へ自動リダイレクト** |
+| `/forgot-password` | 公開パス (`PUBLIC_PATHS`) | アクセス可 | **`/`（ホーム）へ自動リダイレクト** |
+| `/reset-password` | 公開パス (`PUBLIC_PATHS`) | アクセス可 | **`/`（ホーム）へ自動リダイレクト** |
 | `/` (ダッシュボード) | 保護パス | **`/login` へ自動リダイレクト** | アクセス可 |
+| `/change-password` | 保護パス | **`/login` へ自動リダイレクト** | アクセス可 |
 | `/api/**` | APIルート | ミドルウェア対象外 | ミドルウェア対象外 |
 
 ---
@@ -61,111 +66,135 @@
 ```text
 src/
 ├── actions/
-│   └── auth.ts                 # Server Actions (authLoginAction, authLogoutAction)
+│   └── auth.ts                       # Server Actions (Login, Signup, ChangePassword, ForgotPassword, ResetPassword, Logout)
 ├── app/
 │   ├── (auth)/
-│   │   └── login/             # ログインページ
+│   │   ├── login/                   # ログインページ
+│   │   ├── signup/                  # 新規アカウント登録ページ
+│   │   ├── forgot-password/         # パスワード再設定申請ページ
+│   │   └── reset-password/          # パスワード再設定実行ページ (?token=xxx)
 │   └── (dashboard)/
-│       ├── layout.tsx          # ダッシュボード共通レイアウト (Header 配置)
-│       └── page.tsx            # ダッシュボード (保護ページ)
+│       ├── layout.tsx                # ダッシュボード共通レイアウト (Header 配置)
+│       ├── page.tsx                  # ダッシュボード (保護ページ)
+│       └── change-password/          # パスワード変更ページ (保護ページ)
 ├── components/
 │   ├── auth/
-│   │   └── auth-login-form.tsx # ログインフォーム UI
+│   │   ├── auth-login-form.tsx      # ログインフォーム UI
+│   │   ├── auth-signup-form.tsx     # 新規登録フォーム UI
+│   │   ├── change-password-form.tsx # パスワード変更フォーム UI
+│   │   ├── forgot-password-form.tsx # パスワード再設定申請フォーム UI
+│   │   └── reset-password-form.tsx  # パスワード再設定実行フォーム UI
 │   ├── layout/
-│   │   ├── header.tsx          # アプリ共通ヘッダー
-│   │   ├── header-logo.tsx     # ヘッダーロゴ
-│   │   └── user-nav.tsx        # ユーザーアバター＆ドロップダウンメニュー (カード型)
+│   │   ├── header.tsx               # アプリ共通ヘッダー
+│   │   ├── header-logo.tsx          # ヘッダーロゴ
+│   │   └── user-nav.tsx             # ユーザーアバター＆ドロップダウンメニュー (カード型)
 │   └── ui/
-│       └── controlled-input.tsx # 共通制御入力 (パスワード表示切替機能内蔵)
+│       └── controlled-input.tsx      # 共通制御入力 (パスワード表示切替機能内蔵)
 ├── hooks/
-│   ├── use-auth-login-form.ts  # ログインフォーム状態管理フック
-│   ├── use-auth-logout.ts      # ログアウト処理フック
-│   └── use-current-user.ts     # Cookie からのユーザー情報取得フック
+│   ├── use-auth-login-form.ts        # ログインフォーム状態管理フック
+│   ├── use-auth-signup-form.ts       # 新規登録フォーム状態管理フック
+│   ├── use-change-password-form.ts   # パスワード変更フォーム状態管理フック
+│   ├── use-forgot-password-form.ts   # 再設定申請フォーム状態管理フック
+│   ├── use-reset-password-form.ts    # 再設定実行フォーム状態管理フック
+│   ├── use-auth-logout.ts            # ログアウト処理フック
+│   └── use-current-user.ts           # Cookie からのユーザー情報取得フック
 ├── lib/
-│   └── auth-cookie.ts          # Cookie 操作共通関数 (saveSessionCookie, deleteSessionCookie)
+│   └── auth-cookie.ts                # Cookie 操作共通関数 (saveSessionCookie, deleteSessionCookie)
 ├── constants/
-│   └── auth.ts                 # Cookie キー、パス定義定数
-└── middleware.ts               # 認証・認可ミドルウェア
-
+│   └── auth.ts                       # Cookie キー、パス定義定数
+└── middleware.ts                      # 認証・認可ミドルウェア
 ```
 
-### 3.2 主要コンポーネントの役割
+### 3.2 フロントエンド・バックエンド API マッピング
 
-#### 3.2.1. **`ControlledInput` (`src/components/ui/controlled-input.tsx`)**
-
-- `react-hook-form` と UI ライブラリを接続する汎用コンポーネント。
-- `type="password"` が指定された場合、右端に表示/非表示切替トグル（`Eye` / `EyeOff`）を自動挿入する。
-
-#### 3.2.2.  **`useAuthLoginForm` (`src/hooks/use-auth-login-form.ts`)**
-
-- フォームのバリデーション、送信状態管理、Server Action の呼び出しを担当。
-- 成功時には Sonner トーストを出力し、 `router.push('/')` でダッシュボード画面遷移を行う。
-
-#### 3.2.3.  **`middleware.ts` (`src/middleware.ts`)**
-
-- リクエスト毎に `auth_token` Cookie の有無を検証し、保護パスおよび公開パスへのアクセスを制御する。
-
-#### 3.2.5. **`saveSessionCookie` / `deleteSessionCookie` (`src/lib/auth-cookie.ts`)**
-
-- Cookie の保存・削除を一括管理するユーティリティ関数。
-- `CookieItem[]`（オブジェクト配列）を受け取ることで、複数の Cookie 設定を一括ループ処理可能。
-
-#### 3.2.6. **`useCurrentUser` (`src/hooks/use-current-user.ts`)**
-
-- クライアント側（`js-cookie`）で Cookie から `user_name` と `user_email` を取得するカスタムフック。
-- `useEffect` を用いることで SSR 時のハイドレーションミスマッチを防ぎます。
-
-#### 3.2.7. **`UserNav` (`src/components/layout/user-nav.tsx`)**
-
-- ヘッダー右上に配置されるユーザーアバターアイコンおよびドロップダウンメニュー。
-- ドロップダウン内部は上部に「大型アバター＋名前＋メールアドレス」をまとめたアカウントカード、下部にマイページやログアウトボタンを配置した Microsoft 風 UI を採用。
-
-#### 3.2.8. **`useAuthLogout` (`src/hooks/use-auth-logout.ts`)**
-
-- `useTransition` を使用してログアウト中のローディング状態（`isPending`）を管理。
-- `authLogoutAction` を呼び出して Cookie を全削除後、Sonner トースト表示とともに `router.push('/login')` および `router.refresh()` を実行。
+| 画面 / 機能 | 形式 / パス | Server Action | バックエンド API エンドポイント | 正常時動作 |
+| --- | --- | --- | --- | --- |
+| ログイン | `/login` | `authLoginAction` | `POST /api/v1/auth/login` | Session Cookie保存 ➔ `/` 遷移 |
+| 新規アカウント登録 | `/signup` | `authSignupAction` | `POST /api/v1/auth/signup` | Session Cookie保存 ➔ `/` 遷移 |
+| パスワード変更 | `/change-password` | `authChangePasswordAction` | `PUT /api/v1/auth/change-password` | Session Cookie更新 ➔ トースト表示 |
+| パスワード再設定申請 | `/forgot-password` | `authForgotPasswordAction` | `POST /api/v1/auth/forgot-password` | 送信完了画面表示 / トースト表示 |
+| パスワード再設定実行 | `/reset-password` | `authResetPasswordAction` | `POST /api/v1/auth/reset-password` | Session Cookie保存 ➔ `/` 遷移 |
+| ログアウト | ヘッダー操作等 | `authLogoutAction` | -(フロント側Cookie破棄のみ) | Cookie全削除 ➔ `/login` 遷移 |
 
 ---
 
 ## 4. 処理フロー（シーケンス図）
 
-### 4.1 ログイン実行～ダッシュボード遷移フロー
+### 4.1 ログイン / 新規登録 実行フロー（共通パターン）
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User as ユーザー
-    participant Form as AuthLoginForm / Hook
-    participant Action as Server Action<br/>(authLoginAction)
-    participant API as Spring Boot API<br/>(/api/v1/auth/login)
+    participant Form as AuthForm / Hook
+    participant Action as Server Action<br/>(authLoginAction / authSignupAction)
+    participant API as Spring Boot API<br/>(/login or /signup)
     participant Cookie as Browser Cookie
     participant MW as Middleware<br/>(src/middleware.ts)
     participant Dash as Dashboard Page
 
-    User->>Form: メールアドレス・パスワード入力＆送信
-    Form->>Action: authLoginAction(payload) 呼び出し
-    Action->>API: POST /api/v1/auth/login (JSON)
+    User->>Form: フォーム入力＆送信ボタン押下
+    Form->>Action: Server Action 呼び出し (payload)
+    Action->>API: POST /api/v1/auth/... (JSON)
     
-    alt 1. API認証失敗 (401 / 500)
-        API-->>Action: エラーレスポンス (JSON)
+    alt 1. API検証エラー / 認証失敗 (400 / 401 / 500)
+        API-->>Action: ErrorResponse JSON返却
         Action-->>Form: { success: false, message: "..." } 返却
         Form->>User: トーストでエラーメッセージ表示
-    else 2. API認証成功 (200 OK)
-        API-->>Action: { token: "JWT..." } 返却
-        Action->>Cookie: auth_token として Cookie 保存 (httpOnly, path=/)
+    else 2. 処理成功 (200 OK)
+        API-->>Action: AuthResponse { token, username, name } 返却
+        Action->>Cookie: auth_token, user_email, user_name を保存
         Action-->>Form: { success: true } 返却
-        Form->>User: 成功トースト表示 ("ログインしました")
-        Note over Form: 200ms 待機後、router.push('/') を実行
+        Form->>User: 成功トースト表示
+        Note over Form: ディレイ(200ms)待機後、router.push('/')
         
         Form->>MW: リクエスト (GET /)
-        Note over MW: auth_token の存在確認 -> OK
+        Note over MW: auth_token の存在確認 ➔ OK
         MW->>Dash: 画面描画許可 (NextResponse.next)
         Dash-->>User: ダッシュボード画面を表示
     end
-
 ```
 
-### 4.2 直打ち（アドレスバー直接指定）アクセス時のミドルウェア制御フロー
+### 4.2 パスワード再設定（申請〜メール受領〜実行）フロー
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as ユーザー
+    participant App as Next.js App
+    participant Action as Server Action
+    participant API as Spring Boot API
+    participant Mail as メール受信箱
+
+    %% --- 申請フェーズ ---
+    User->>App: /forgot-password でメールアドレス入力＆送信
+    App->>Action: authForgotPasswordAction(email)
+    Action->>API: POST /api/v1/auth/forgot-password
+    API-->>Action: 200 OK (MessageResponse)
+    Action-->>App: 成功返却
+    App-->>User: 「案内メールを送信しました」表示
+    API->>Mail: 再設定リンク送信 (/reset-password?token=rawToken)
+
+    %% --- 実行フェーズ ---
+    User->>Mail: メール内のリンクをクリック
+    Mail->>App: /reset-password?token=rawToken を開く
+    User->>App: 新しいパスワードを入力して送信
+    App->>Action: authResetPasswordAction(token, newPassword)
+    Action->>API: POST /api/v1/auth/reset-password
+    
+    alt A. トークン無効・期限切れ・重複エラー (400 / 409)
+        API-->>Action: ErrorResponse JSON返却
+        Action-->>App: { success: false, message: "..." }
+        App-->>User: トーストでエラーメッセージ表示
+    else B. 再設定成功 (200 OK)
+        API-->>Action: AuthResponse { token, username, name } 返却
+        Note over Action: 新トークンで Session Cookie を一括更新
+        Action-->>App: { success: true }
+        App-->>User: 成功トースト表示 ➔ 自動ログインして / へリダイレクト
+    end
+```
+
+### 4.3 直打ちアクセス時のミドルウェア制御フロー
 
 ```mermaid
 sequenceDiagram
@@ -175,24 +204,23 @@ sequenceDiagram
     participant Cookie as Browser Cookie
     participant App as Next.js Router
 
-    User->>MW: アドレスバーに URL 直接入力 (例: /login)
+    User->>MW: アドレスバーに URL 直接入力
     MW->>Cookie: auth_token の取得要求
     
-    alt A. ログイン済み（トークン存在）かつ /login へアクセス
+    alt A. ログイン済み（トークン存在）かつ 公開パス (/login, /signup等) へアクセス
         Cookie-->>MW: トークン取得成功
         Note over MW: ログイン済みの公開パスアクセスを検知
         MW-->>App: リダイレクト命令 (NextResponse.redirect -> '/')
         App-->>User: ダッシュボード (/) を表示
-    else B. 未ログイン（トークンなし）かつ 保護パス (/) へアクセス
+    else B. 未ログイン（トークンなし）かつ 保護パス (/, /change-password等) へアクセス
         Cookie-->>MW: トークンなし (null/undefined)
         Note over MW: 未ログインの保護パスアクセスを検知
         MW-->>App: リダイレクト命令 (NextResponse.redirect -> '/login')
         App-->>User: ログイン画面 (/login) を表示
     end
-
 ```
 
-### 4.3 ログアウト実行フロー
+### 4.4 ログアウト実行フロー
 
 ```mermaid
 sequenceDiagram
@@ -214,24 +242,21 @@ sequenceDiagram
     Hook->>App: router.push('/login') 実行
     Hook->>App: router.refresh() 実行 (サーバーコンポーネント状態最新化)
     App-->>User: ログイン画面 (/login) を表示
-
 ```
 
 ---
 
 ## 5. 開発時の留意事項・ハマりどころ（Pitfalls & Best Practices）
 
-ドキュメントとして将来の保守・改修時に特に注意すべきポイントを以下に記録します。
-
 ### ① `middleware.ts` の配置場所（最重要）
 
 - **罠**: `src` ディレクトリ構造を採用しているプロジェクトにおいて、`middleware.ts` をプロジェクトルート直下に配置すると **Next.js に完全に無視され、ミドルウェアが一切起動しない**。
 - **対策**: 必ず **`src/middleware.ts`** に配置すること。
 
-### ② ミドルウェアの実行環境とログ出力
+### ② パスワード再設定トークン（`URL Query Parameter`）の受け渡し
 
-- **罠**: ミドルウェアはブラウザ（クライアント）ではなく Node.js サーバー環境で実行されるため、`console.log` を仕込んでもブラウザのデベロッパーツール（F12）には表示されない。
-- **対策**: 動作確認時のログは **`npm run dev` を実行している Terminal（サーバーログ）** を確認すること。
+- **罠**: `/reset-password?token=xxx` のトークン取得において、Client Component 内で `useSearchParams()` を使用する場合、`<Suspense>` でラップしないとビルド時に SSR エラー（またはクライアント側全体レンダリング遅延）が発生する。
+- **対策**: ページ側（`app/(auth)/reset-password/page.tsx`）で `searchParams` プロップスを受け取り、フォームコンポーネントへ Props 経由で渡すか、`<Suspense>` バウンダリを適切に設定すること。
 
 ### ③ Server Actions における `redirect()` の取り扱い
 
@@ -240,17 +265,10 @@ sequenceDiagram
 
 ### ④ トースト表示と画面遷移のタイミング制御
 
-- **罠**: ログイン成功時にトーストを表示して即座に `router.push()` を実行すると、コンポーネントがアンマウントされてトーストが画面に映る前に消えてしまう。
+- **罠**: ログインやパスワード更新成功時にトーストを表示して即座に `router.push()` を実行すると、コンポーネントがアンマウントされてトーストが画面に映る前に消えてしまう。
 - **対策**: `setTimeout`（100〜300ms 程度）のディレイを挟んでから `router.push` を呼び出すことで、ユーザーに成功トーストを確実に視認させる。
 
 ### ⑤ CORS と Credentials（Spring Boot 連携）
 
 - **罠**: Cookie を利用した認証通信を行う場合、Spring Boot 側の SecurityConfig で `allowedOrigins("*")` を設定しているとブラウザが Security エラーで通信を遮断する。
 - **対策**: `allowCredentials(true)` を有効化し、`allowedOrigins` には `http://localhost:3000` などの具体的な送信元オリジンを明示的に指定すること。
-
-### ⑥ クライアントコンポーネントでの Cookie 取得と SSR ハイドレーション
-
-- **罠**: クライアントコンポーネントで直接 `Cookies.get()` して初期値にセットすると、サーバーレンダリング時（Cookie 読み取り不可）とクライアントハイドレーション時で DOM にギャップが生じ、Hydration Error が発生する。
-- **対策**: `useCurrentUser` 内のように、初期状態は空文字列にしておき `useEffect` 内で Cookie を取得・セットすること。
-
----
