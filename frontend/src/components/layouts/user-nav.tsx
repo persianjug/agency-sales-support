@@ -7,12 +7,12 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useCurrentUser } from "@/hooks/use-current-user"
+import Link from "next/link"
 
 const UserNav = () => {
   const { handleLogout, isPending } = useAuthLogout();
@@ -53,9 +53,17 @@ const UserNav = () => {
           <DropdownMenuSeparator className="my-2" />
 
           {/* 中央: マイページなどの機能メニュー */}
-          <DropdownMenuItem disabled className="py-2.5 cursor-not-allowed">
+          {/* <DropdownMenuItem disabled className="py-2.5 cursor-not-allowed">
             <User className="mr-3 h-4 w-4 text-muted-foreground" />
             <span className="text-sm">マイページ (準備中)</span>
+          </DropdownMenuItem> */}
+
+          {/* 中央: マイページへのリンク */}
+          <DropdownMenuItem className="p-0 cursor-pointer">
+            <Link href="/profile" className="flex items-center w-full px-1.5 py-2.5">
+              <User className="mr-3 h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">マイページ</span>
+            </Link>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="my-2" />
