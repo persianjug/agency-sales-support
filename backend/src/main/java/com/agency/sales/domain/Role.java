@@ -7,16 +7,25 @@ import lombok.Getter;
  */
 @Getter
 public enum Role {
-  /** システム管理者権限 */
-  ROLE_ADMIN("管理者"),
+  ROLE_SOLICITOR("0001", "募集人"),
+  ROLE_AGENCY_ADMIN("0002", "代理店管理者"),
+  ROLE_HQ_STAFF("0003", "本部スタッフ"),
+  ROLE_SYSTEM_ADMIN("0004", "システム管理者"),
+  ROLE_USER("0009","一般ユーザー");
 
-  /** 一般ユーザー権限 */
-  ROLE_USER("一般ユーザー");
+  // SOLICITOR("ROLE_SOLICITOR", "スタッフ（一般ユーザー）"),
+  // AGENCY_ADMIN("ROLE_AGENCY_ADMIN", "代理店管理者"),
+  // HQ_STAFF("ROLE_HQ_STAFF", "本部スタッフ"),
+  // SYSTEM_ADMIN("ROLE_SYSTEM_ADMIN", "システム管理者");
+
+  /** 権限コード（画面表示・マッピング用） */
+  private final String code;
 
   /** 権限の概要日本語説明 */
   private final String description;
 
-  Role(String description) {
+  Role(String code, String description) {
+    this.code = code;
     this.description = description;
   }
 }

@@ -16,7 +16,7 @@ type ControlledInputProps<T extends FieldValues> = {
   /** フォームフィールドの識別名（フォーム型 `T` のキー構造に安全に準拠するパス） */
   name: Path<T>
   /** 画面上に表示するラベルテキスト */
-  label: string
+  label?: string
   /** HTML input 要素の type 属性（デフォルト: `"text"`） */
   type?: string
   /** input 要素のプレースホルダーテキスト */

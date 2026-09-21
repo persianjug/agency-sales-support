@@ -1,6 +1,6 @@
 import DashboardHeader from "@/components/command/DashboardHeader";
 import DealsTable from "@/components/table/deals-table"
-import { getDeals } from "@/mocks/deals";
+import { getDeals } from "@/mocks/deals-mock";
 
 /**
  * ダッシュボードのメインページ（Server Component）

@@ -4,11 +4,39 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+
+/**
+ * 型定義を拡張して noWrapper と containerClassName を受け取れるようにする 
+ */
+type TableProps = React.ComponentProps<"table"> & {
+  noWrapper?: boolean
+  containerClassName?: string
+}
+
+
+function Table({
+  className,
+  noWrapper = false,
+  containerClassName,
+  ...props
+}: TableProps) {
+
+  // 1. noWrapper が true の場合は、ラッパー div を生成せずに <table> のみを返す
+  if (noWrapper) {
+    return (
+      <table
+        data-slot="table"
+        className={cn("w-full caption-bottom text-sm", className)}
+        {...props}
+      />
+    )
+  }
+
+  // 2. 通常時はデフォルトのラッパー div で包んで返す（既存影響なし）
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn("relative w-full overflow-x-auto", containerClassName)}
     >
       <table
         data-slot="table"
