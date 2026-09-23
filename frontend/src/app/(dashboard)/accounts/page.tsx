@@ -16,7 +16,7 @@ const AccountListPage = async () => {
     throw result;
   }
 
-  return <AccountListTable data={result.items} />;
+  return <AccountListTable data={result} />;
 }
 
 export default AccountListPage;
