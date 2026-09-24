@@ -2,9 +2,10 @@
 
 import { Camera } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 /**
- * Props定義
+ * AvatarDisplay Props定義
  */
 type AvatarDisplayProps = {
   /* アバター画像のパス */
@@ -14,7 +15,7 @@ type AvatarDisplayProps = {
   /** 背景色クラス（Fallback用） */
   bgColorClass?: string;
   /* アバターのサイズ */
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   /* 編集モードか？ */
   editable?: boolean;
   /* クリック時のハンドラー関数 */
@@ -23,7 +24,8 @@ type AvatarDisplayProps = {
 
 // アバターサイズのclass定義
 const sizeClasses = {
-  sm: "h-12 w-12 text-lg",
+  xs: "h-8 w-8 text-xs",
+  sm: "h-12 w-12 text-sm",
   md: "h-16 w-16 text-2xl",
   lg: "h-24 w-24 text-4xl",
 };
@@ -43,21 +45,21 @@ const sizeClasses = {
 const AvatarDisplay = ({
   src,
   name = "U",
-  bgColorClass = "bg-blue-600",
+  bgColorClass = "bg-muted text-muted-foreground",
   size = "lg",
   editable = false,
   onClick,
 }: AvatarDisplayProps) => {
   const initialLetter = name.charAt(0).toUpperCase();
-
+  
   return (
     <div
       className={`relative inline-block ${editable ? "group cursor-pointer" : ""}`}
       onClick={editable ? onClick : undefined}
     >
-      <Avatar className={`${sizeClasses[size]} border-2 border-background shadow-sm`}>
+      <Avatar className={`${sizeClasses[size]} border border-border/50 shadow-xs shrink-0`}>
         <AvatarImage src={src} alt={name} />
-        <AvatarFallback className={`${bgColorClass} text-white font-bold`}>
+        <AvatarFallback className={`${bgColorClass} font-semibold`}>
           {initialLetter}
         </AvatarFallback>
       </Avatar>
