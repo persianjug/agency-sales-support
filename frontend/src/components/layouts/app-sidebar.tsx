@@ -86,7 +86,7 @@ export const AppSidebar = ({
               onClick={toggleSidebar}
               className="hover:bg-transparent active:bg-transparent cursor-pointer flex-1 p-0"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white shrink-0">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
                 <Shield className="size-4" />
               </div>
               <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden ml-2">
@@ -134,13 +134,13 @@ export const AppSidebar = ({
                     isActive={isActive}
                     tooltip={item.title}
                     // 右端アクセントバー（after:right-0）＋明確な青文字スタイル
-                    className={`h-9.5 text-sm font-medium rounded-md transition-all relative px-3 ${
-                      isActive
-                        ? "bg-blue-50/70 !text-blue-600 font-semibold after:absolute after:right-0 after:top-2 after:bottom-2 after:w-1 after:bg-blue-600 after:rounded-l"
+                    className={`h-9.5 text-sm font-medium rounded-md transition-all relative px-3 
+                      ${isActive
+                        ? "bg-sidebar-accent !text-sidebar-accent-foreground font-semibold after:absolute after:right-0 after:top-2 after:bottom-2 after:w-1 after:bg-primary after:rounded-l"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                   >
-                    <item.icon className={`size-4.5 shrink-0 ${isActive ? "text-blue-600" : ""}`} />
+                    <item.icon className={`size-4.5 shrink-0 ${isActive ? "text-primary" : ""}`} />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

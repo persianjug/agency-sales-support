@@ -1,0 +1,41 @@
+:root {
+  /* 背景：わずかに青みがかったソフトな背景 */
+  --background: oklch(0.985 0.005 230);
+  --foreground: oklch(0.22 0.02 240);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 240);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 240);
+
+  /* Primary: #0F2942 (ディープサファイア) */
+  --primary: oklch(0.28 0.06 240);
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.96 0.01 230);
+  --secondary-foreground: oklch(0.22 0.02 240);
+
+  --muted: oklch(0.96 0.008 230);
+  --muted-foreground: oklch(0.5 0.03 230);
+
+  /* Accent: #0284C7 (スカイブルー) */
+  --accent: oklch(0.95 0.02 230);
+  --accent-foreground: oklch(0.55 0.14 230);
+
+  --destructive: oklch(0.577 0.245 27.325);
+
+  --border: oklch(0.91 0.008 230);
+  --input: oklch(0.91 0.008 230);
+  --ring: oklch(0.55 0.14 230);
+
+  --radius: 0.5rem;
+
+  --sidebar: oklch(0.98 0.005 230);
+  --sidebar-foreground: oklch(0.22 0.02 240);
+  --sidebar-primary: oklch(0.28 0.06 240);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.94 0.025 230);
+  --sidebar-accent-foreground: oklch(0.55 0.14 230);
+  --sidebar-border: oklch(0.91 0.008 230);
+}

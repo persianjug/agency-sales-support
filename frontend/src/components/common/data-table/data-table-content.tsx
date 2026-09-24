@@ -1,14 +1,7 @@
 "use client";
 
 import { FlexRender, Table as TableType, RowData } from "@tanstack/react-table";
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
-
+import { Table, TableBody, TableCell, TableRow, } from "@/components/ui/table";
 import { type DataTableFeatures } from "./data-table-features";
 import DataTableHeader from "./data-table-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -65,11 +58,13 @@ export const DataTableContent = <TData extends RowData>({
       <TableRow
         key={row.id}
         // モダン＆高可視性スタイル（ネイビーヘッダー＋ほんのりブルーホバー）
-        className="border-b border-slate-200 transition-colors hover:bg-slate-100/80"
+        // className="border-b border-slate-200 transition-colors hover:bg-slate-100/80"
+        className="border-b border-border/60 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
       >
         {row.getVisibleCells().map((cell) => (
           <TableCell key={cell.id}
-            className="border-x-0"
+            // className="border-x-0"
+            className="py-3 px-4"
             style={
               {
                 width: `${cell.column.getSize()}px`,
@@ -87,7 +82,8 @@ export const DataTableContent = <TData extends RowData>({
 
   return (
     <ScrollArea className={cn(
-      "rounded-md border border-slate-300",
+      // "rounded-md border border-slate-300",
+      "rounded-lg border border-border bg-card shadow-sm",
       heightClass,
       className
     )}>

@@ -1,17 +1,53 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { BIZ_UDPGothic, Inter, Noto_Sans_JP, Plus_Jakarta_Sans, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
-// import { Toaster } from "@/components/ui/toast";
 import { Toaster } from "sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
+
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
+
+// 欧文フォント Inter
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// 欧文フォント Plus Jakarta Sans
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
+
+// 和文フォント Noto Sans JP
+const notoSamJP = Noto_Sans_JP({
+  subsets: ["latin"],
+  variable: "--font-noto-sans-jp",
+  display: "swap",
+});
+
+// 和文フォント BIZ UDPゴシック
+const bizUdGothic = BIZ_UDPGothic({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-biz-udgothic",
+  display: "swap",
+});
+
+// 和文フォント Zen Kaku Gothic New
+const zenKakuGothic = Zen_Kaku_Gothic_New({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-zen-kaku",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,12 +63,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // className={`${inter.variable} ${notoSamJP.variable} h-full antialiased`}
+      // className={`${plusJakartaSans.variable} ${bizUdGothic.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} ${notoSamJP.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}
         {/* <Toaster /> */}
-        <Toaster position="top-right" richColors />
+        {/* <Toaster position="top-right" richColors /> */}
       </body>
       
     </html>

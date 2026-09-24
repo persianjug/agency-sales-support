@@ -24,12 +24,15 @@ type DataTableColumnHeaderProps<TData extends RowData, TValue> = {
 const renderSortIcon = (isSorted: false | "asc" | "desc") => {
   if (isSorted === "desc") {
     return <ChevronDown className="ml-2 size-5" strokeWidth={3} />;
+    // return <ChevronDown className="ml-1.5 size-4" />;
   }
   if (isSorted === "asc") {
     return <ChevronUp className="ml-2 size-5" strokeWidth={3} />;
+    // return <ChevronUp className="ml-1.5 size-4" />;
   }
   // return <ChevronsUpDown className="ml-2  opacity-50" />;
-  return <ChevronsUpDown className="ml-2 size-5 opacity-50" strokeWidth={3} />;
+  return <ChevronsUpDown className="ml-2 size-5 opacity-40" strokeWidth={3} />;
+  // return <ChevronsUpDown className="ml-1.5 size-4 opacity-40" />;
 }
 
 /**
@@ -52,7 +55,8 @@ export const DataTableColumnHeader = <TData extends RowData, TValue>({
     <Button
       variant="ghost"
       size="sm"
-      className="px-2 w-full justify-between text-slate-50 hover:bg-slate-700 hover:text-white data-[state=open]:bg-slate-700"
+      // className="px-2 w-full justify-between text-slate-50 hover:bg-slate-700 hover:text-white data-[state=open]:bg-slate-700"
+      className="px2 h-8 px-2 justify-between text-muted-foreground hover:text-foreground hover:bg-background/80 data-[state=open]:bg-accent"
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
     >
       <span>{title}</span>

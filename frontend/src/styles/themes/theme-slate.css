@@ -1,0 +1,48 @@
+:root {
+  /* 背景：クリーンな無彩色ライトグレー */
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.2 0.01 250);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.01 250);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.01 250);
+
+  /* Primary: #0F172A (スレート900・シックな黒に近い紺) */
+  /* --primary: oklch(0.21 0.02 260); */
+
+  /* Primary: #0D9488 (鮮やかなティール/エメラルドに変更) */
+  --primary: oklch(0.55 0.14 180);
+
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.2 0.01 250);
+
+  --muted: oklch(0.96 0.005 200);
+  --muted-foreground: oklch(0.5 0.02 200);
+
+  /* Accent: #0D9488 (ティール) */
+  --accent: oklch(0.95 0.03 180);
+  --accent-foreground: oklch(0.5 0.14 180);
+
+  --destructive: oklch(0.577 0.245 27.325);
+
+  --border: oklch(0.91 0.005 200);
+  --input: oklch(0.91 0.005 200);
+  --ring: oklch(0.5 0.14 180);
+
+  --radius: 0.5rem;
+
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.2 0.01 250);
+
+  /* --sidebar-primary: oklch(0.21 0.02 260); */
+  --sidebar-primary: oklch(0.55 0.14 180);
+
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.94 0.03 180);
+  --sidebar-accent-foreground: oklch(0.5 0.14 180);
+  --sidebar-border: oklch(0.91 0.005 200);
+}
