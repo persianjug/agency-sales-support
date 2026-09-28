@@ -21,14 +21,6 @@ type FormPhonenumberSectionProps = {
 export const FormPhonenumberSection = ({
   form,
 }: FormPhonenumberSectionProps) => {
-
-  /** アバターイニシャル用の姓をリアルタイム監視 */
-  const lastName = useWatch({
-    control: form.control,
-    name: "lastName",
-    defaultValue: "",
-  });
-
   return (
     <FormRow1Col label="営業用電話番号" contentClassName="p-2.5">
       <div className="max-w-md">

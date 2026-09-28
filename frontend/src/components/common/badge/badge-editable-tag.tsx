@@ -21,12 +21,15 @@ type BadgeEditableTagProps = {
  */
 export const BadgeEditableTag = ({ label, onRemove }: BadgeEditableTagProps) => {
   return (
-    <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200 font-normal px-3 py-1 text-xs rounded-full shadow-none flex items-center gap-1.5">
+    <Badge
+      variant="outline"
+      className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 font-normal px-3 py-3 text-xs rounded-full shadow-none flex items-center gap-1.5 transition-colors"
+    >
       <span>{label}</span>
       <button
         type="button"
         onClick={onRemove}
-        className="hover:bg-emerald-300/60 rounded-full p-0.5 text-emerald-900 transition-colors"
+        className="hover:bg-muted-foreground/20 rounded-full p-0.5 transition-colors"
         aria-label={`${label}を削除`}
       >
         <X className="w-3 h-3" />

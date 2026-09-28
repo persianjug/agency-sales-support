@@ -5,10 +5,9 @@ import { useController, UseFormReturn } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { Certification } from "@/types/api/common-type";
 import FormRow1Col from "@/components/common/form/form-row-1col";
-import BadgeEditableTag from "@/components/common/badge/badge-editable-tag";
-import AutocompleteSelect from "@/components/common/form/form-autocomplete-select";
-import { Button } from "@/components/ui/button";
-
+import FormAutocompleteSelect from "@/components/common/form/form-autocomplete-select";
+import AppButton from "@/components/common/button/app-button";
+import AppBadge from "@/components/common/badge/app-badge";
 /**
  * FormCertificationSection コンポーネントの Props 定義
  */
@@ -24,13 +23,13 @@ type FormCertificationSectionProps = {
  * アカウント作成フォームにおける「保有資格」選択セクションコンポーネント
  *
  * @param props - {@link FormCertificationSectionProps}
- * @returns 保有資格のタグ表示・追加（AutocompleteSelect）・削除を行う UI
+ * @returns 保有資格のタグ表示・追加（FormAutocompleteSelect）・削除を行う UI
  */
 export const FormCertificationSection = ({
   form,
   certificationsMast = [],
 }: FormCertificationSectionProps) => {
-  /** 資格追加フォーム（AutocompleteSelect）の表示/非表示フラグ */
+  /** 資格追加フォーム（FormAutocompleteSelect）の表示/非表示フラグ */
   const [isAddingCert, setIsAddingCert] = useState(false);
 
   /** React Hook Form による保有資格配列（certifications）の制御 */
@@ -43,17 +42,24 @@ export const FormCertificationSection = ({
   const selectedCerts: Certification[] = certField.value || [];
 
   /**
-   * AutocompleteSelect で資格が選択された際の追加ハンドラー
+   * FormAutocompleteSelect で資格が選択された際の追加ハンドラー
    *
    * @param certName - ドロップダウンで選択された資格の名称（未選択時は null）
    */
-  const handleSelectCert = (certName: string | null) => {
+  const handleSelectCert = (selectedDisplayValue: string | null) => {
     // ガード1: 未選択（null）の場合は処理を抜ける
-    if (!certName) return;
+    if (!selectedDisplayValue) return;
 
-    // マスタデータから選択された資格オブジェクトを検索
     // ガード2: マスタに存在しない場合は処理を抜ける
-    const matched = certificationsMast.find((c) => c.name === certName);
+    const codeMatch = selectedDisplayValue.match(/^(\d+):/);
+    const targetCode = codeMatch ? parseInt(codeMatch[1], 10) : null;
+    // マスタデータから選択された資格オブジェクトを検索
+    const matched = certificationsMast.find((c) =>
+      targetCode !== null
+        ? c.certificationCode === targetCode
+        : c.name === selectedDisplayValue
+    );
+
     if (!matched) return;
 
     // ガード3: 既に選択済みの資格の場合は処理を抜ける（重複登録防止）
@@ -89,7 +95,7 @@ export const FormCertificationSection = ({
   /**
    * まだ選択されていない資格名称リストをフィルタリングして取得する関数
    *
-   * @returns AutocompleteSelect の選択肢候補となる資格名称の配列
+   * @returns FormAutocompleteSelect の選択肢候補となる資格名称の配列
    */
   const getAvailableCertificationNames = () => {
     return certificationsMast
@@ -105,23 +111,27 @@ export const FormCertificationSection = ({
       {/* 選択済み資格タグ一覧 & 追加ボタン */}
       <div className="flex flex-wrap gap-2 items-center">
         {selectedCerts.map((cert) => (
-          <BadgeEditableTag
+          <AppBadge
             key={cert.certificationCode}
-            label={cert.name}
             onRemove={() => handleRemoveCert(cert.certificationCode)}
-          />
+            className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 font-normal px-3 py-3 text-xs rounded-full shadow-none flex items-center gap-1.5 transition-colors"
+          >
+            {cert.name}
+          </AppBadge>
         ))}
 
         {!isAddingCert && (
-          <Button
+          <AppButton
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => setIsAddingCert(true)}
-            className="text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 h-7 text-xs font-medium px-2.5 border border-dashed border-emerald-300"
+            startIcon={<Plus className="w-3.5 h-3.5" />}
+            // className="h-7 text-xs font-medium px-2.5 border-dashed text-primary hover:text-primary hover:bg-accent"
+            className="h-8 text-xs mt-1 border-primary text-primary hover:text-primary hover:bg-accent"
           >
-            <Plus className="w-3.5 h-3.5 mr-1" /> 資格を追加
-          </Button>
+            資格を追加
+          </AppButton>
         )}
       </div>
 
@@ -129,7 +139,7 @@ export const FormCertificationSection = ({
       {isAddingCert && (
         <div className="flex items-center gap-2 max-w-md pt-1">
           <div className="flex-1">
-            <AutocompleteSelect
+            <FormAutocompleteSelect
               items={getAvailableCertificationNames()}
               onValueChange={handleSelectCert}
               placeholder="資格名を入力して検索..."
@@ -137,7 +147,16 @@ export const FormCertificationSection = ({
             />
           </div>
 
-          <Button
+          <AppButton
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAddingCert(false)}
+            className="h-9 px-3 text-xs"
+          >
+            キャンセル
+          </AppButton>
+          {/* <Button
             type="button"
             variant="ghost"
             size="sm"
@@ -145,7 +164,7 @@ export const FormCertificationSection = ({
             className="h-9 px-3 text-xs"
           >
             キャンセル
-          </Button>
+          </Button> */}
         </div>
       )}
     </FormRow1Col>

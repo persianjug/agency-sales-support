@@ -21,14 +21,6 @@ type FormGreetingMessageSectionProps = {
 export const FormGreetingMessageSection = ({
   form,
 }: FormGreetingMessageSectionProps) => {
-
-  /** アバターイニシャル用の姓をリアルタイム監視 */
-  const lastName = useWatch({
-    control: form.control,
-    name: "lastName",
-    defaultValue: "",
-  });
-
   return (
     <FormRow1Col
       label="ご挨拶メッセージ"

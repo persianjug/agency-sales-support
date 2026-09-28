@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 /**
  * 2列構成（ラベル+値が2セット）の行コンポーネントの Props
  */
@@ -33,15 +35,26 @@ const ViewRow2Col = ({
   value1ClassName = "",
 }: ViewRow2ColProps) => {
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-12 ${hasBorderBottom ? "border-b" : ""}`}>
+    <div className={
+      cn(
+        "grid grid-cols-1 md:grid-cols-12",
+        hasBorderBottom && "border-b"
+      )}
+    >
       <div
-        className={`
-          md:col-span-2 bg-muted/60 p-3 font-medium text-muted-foreground border-r flex items-center
-          ${nowrapLabel1 ? "whitespace-nowrap" : ""}`}
+        className={
+          cn(
+            "md:col-span-2 bg-muted/60 p-3 font-medium text-muted-foreground border-r flex items-center",
+            nowrapLabel1 && "whitespace-nowrap"
+          )}
       >
         {label1}
       </div>
-      <div className={`md:col-span-4 p-3 font-medium flex items-center border-r ${value1ClassName}`}>
+      <div className={
+        cn(
+          "md:col-span-4 p-3 font-medium flex items-center border-r",
+          value1ClassName
+        )}>
         {value1}
       </div>
       <div className="md:col-span-2 bg-muted/60 p-3 font-medium text-muted-foreground border-r flex items-center">

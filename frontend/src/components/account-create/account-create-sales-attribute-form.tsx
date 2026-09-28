@@ -35,13 +35,6 @@ export const AccountCreateSalesAttributeForm = ({
   specialtiesMast = [],
 }: AccountCreateSalesAttributeFormProps) => {
 
-  /** アバターイニシャル用の姓をリアルタイム監視 */
-  const lastName = useWatch({
-    control: form.control,
-    name: "lastName",
-    defaultValue: "",
-  });
-
   return (
     <div className="space-y-2">
       {/* セクションヘッダー（タイトル: 連絡先・営業属性 / バッジ: 任意） */}
