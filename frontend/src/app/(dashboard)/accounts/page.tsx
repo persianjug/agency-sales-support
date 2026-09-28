@@ -1,4 +1,6 @@
-import AccountListTable from "@/components/accounts/account-list-table";
+import AccountListAddButton from "@/components/account-list/account-list-add-button";
+import AccountListTable from "@/components/account-list/account-list-table";
+import PageContainer from "@/components/common/container/page-container";
 import { getAccounts } from "@/mocks/accounts-mock";
 import { AccountListGetResponse } from "@/types/api/account-type";
 
@@ -16,7 +18,21 @@ const AccountListPage = async () => {
     throw result;
   }
 
-  return <AccountListTable data={result} />;
+  return (
+    <PageContainer
+      title="アカウント一覧"
+      badge={
+        <span className="text-sm text-muted-foreground align-text-bottom">
+          {`（全${result.totalCount}人）`}
+        </span>
+      }
+      action={
+        <AccountListAddButton />
+      }
+    >
+      <AccountListTable data={result} />
+    </PageContainer>
+  );
 }
 
 export default AccountListPage;

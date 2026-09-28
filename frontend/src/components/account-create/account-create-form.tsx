@@ -23,7 +23,7 @@ const AccountCreateForm = ({certifications, specialties}: AccountCreateFormProps
   const { form, handleSubmit, isSubmitting } = useAccountCreateForm();
 
   return (
-    <div className="container max-w-5xl py-8 space-y-6">
+    <div className="py-8 space-y-6">
       <form id="account-create-form" onSubmit={handleSubmit} className="space-y-6">
         {/* ログイン・アカウント情報の編集 */}
         <AccountCreateLoginInfoForm form={form} />

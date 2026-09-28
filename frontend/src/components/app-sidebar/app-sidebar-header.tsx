@@ -8,7 +8,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import Logo from "../common/logo";
+import Logo from "../common/logo/logo";
 
 export const AppSidebarHeader = () => {
   const { toggleSidebar } = useSidebar();

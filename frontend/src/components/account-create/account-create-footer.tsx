@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import AppButton from "../common/button/app-button";
 
 type AccountCreateFooterProps = {
   /** フォーム送信中の状態フラグ */
@@ -21,7 +21,7 @@ const AccountCreateFooter = ({
 
   return (
     <div className="flex justify-end gap-3 pt-4">
-      <Button
+      <AppButton
         type="button"
         variant="outline"
         onClick={() => router.back()}
@@ -29,15 +29,16 @@ const AccountCreateFooter = ({
         className="min-w-[100px]"
       >
         キャンセル
-      </Button>
-      <Button
+      </AppButton>
+      <AppButton
         type="submit"
         form={formId}
-        className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[120px]"
         disabled={isSubmitting}
+        loading={isSubmitting}
+        className="min-w-[120px]"
       >
-        {isSubmitting ? "作成中..." : "アカウントを作成する"}
-      </Button>
+        アカウントを作成する
+      </AppButton>
     </div>
   );
 };

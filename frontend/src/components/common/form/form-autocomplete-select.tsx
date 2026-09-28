@@ -8,11 +8,12 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { cn } from "@/lib/utils";
 
 /**
- * AutocompleteSelect コンポーネントの Props 定義
+ * FormAutocompleteSelect コンポーネントの Props 定義
  */
-type AutocompleteSelectProps = {
+type FormAutocompleteSelectProps = {
   /** ドロップダウンの選択肢一覧 */
   items: readonly string[] | string[];
   /** 現在選択されている値 */
@@ -30,20 +31,28 @@ type AutocompleteSelectProps = {
 /**
  * サジェスト・検索機能が付いた汎用ドロップダウン（Combobox）コンポーネント
  *
- * @param props - {@link AutocompleteSelectProps}
+ * @param props - {@link FormAutocompleteSelectProps}
  * @returns JSX.Element - 検索入力機能付きの Combobox UI
  */
-export const AutocompleteSelect = ({
+export const FormAutocompleteSelect = ({
   items,
   value,
   onValueChange,
   placeholder = "入力して検索...",
   emptyMessage = "一致する項目が見つかりません",
   className = "h-9",
-}: AutocompleteSelectProps) => {
+}: FormAutocompleteSelectProps) => {
   return (
     <Combobox items={items} value={value} onValueChange={onValueChange}>
-      <ComboboxInput placeholder={placeholder} className={className} showClear />
+      <ComboboxInput
+        placeholder={placeholder}
+        className={
+          cn(
+            className,
+            "focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring"
+          )}
+        showClear
+      />
       <ComboboxContent>
         <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
         <ComboboxList>
@@ -58,4 +67,4 @@ export const AutocompleteSelect = ({
   );
 };
 
-export default AutocompleteSelect;
+export default FormAutocompleteSelect;
