@@ -184,4 +184,10 @@
     box-shadow: none !important;
   }
 
+  /* コマンドパレット内のインプット要素のアウトライン強制解除 */
+  [data-slot="command-input"]:focus-visible,
+  [data-slot="command-input"]:focus {
+    outline: none !important;
+  }
+
 }
