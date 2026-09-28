@@ -1,17 +1,6 @@
 import type { Metadata } from "next";
 import { BIZ_UDPGothic, Inter, Noto_Sans_JP, Plus_Jakarta_Sans, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 // 欧文フォント Inter
 const inter = Inter({
@@ -63,15 +52,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      // className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      // className={`${inter.variable} ${notoSamJP.variable} h-full antialiased`}
-      // className={`${plusJakartaSans.variable} ${bizUdGothic.variable} h-full antialiased`}
       className={`${plusJakartaSans.variable} ${notoSamJP.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}
-        {/* <Toaster /> */}
-        {/* <Toaster position="top-right" richColors /> */}
       </body>
       
     </html>
