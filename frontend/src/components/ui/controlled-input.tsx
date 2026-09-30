@@ -1,7 +1,7 @@
 import { Control, Controller, FieldValues, Path } from "react-hook-form"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
+import { ComponentPropsWithoutRef, useState } from "react"
 import { Button } from "./button"
 import { AlertCircle, Eye, EyeOff } from "lucide-react"
 
@@ -9,8 +9,11 @@ import { AlertCircle, Eye, EyeOff } from "lucide-react"
  * `ControlledInput` コンポーネントの Props 定義
  *
  * @template T - react-hook-form で管理するフォーム値の型（`FieldValues` を継承）
+ * @remarks
+ * `ComponentPropsWithoutRef<"input">` を統合することで、
+ * `onChangeCapture`, `readOnly`, `maxLength` などの HTML input 標準属性を直接透過できます。
  */
-type ControlledInputProps<T extends FieldValues> = {
+export type ControlledInputProps<T extends FieldValues> = {
   /** react-hook-form の `useForm` から取得した `control` オブジェクト */
   control: Control<T>
   /** フォームフィールドの識別名（フォーム型 `T` のキー構造に安全に準拠するパス） */
@@ -25,7 +28,7 @@ type ControlledInputProps<T extends FieldValues> = {
   autoComplete?: string
   /** 読み取り専用フラグ（デフォルト: `false`） */
   readOnly?: boolean
-}
+} & Omit<ComponentPropsWithoutRef<"input">, "name">
 
 /**
  * react-hook-form と UI ライブラリの Input を接続する汎用入力コンポーネント
@@ -38,7 +41,8 @@ type ControlledInputProps<T extends FieldValues> = {
  * - `Controller` を介してフォーム状態をアタッチし、バリデーションエラー時には自動で `FieldError` を描画します。
  * - `type="password"` が指定された場合、パスワードの表示/非表示を切り替えるトグルボタンを自動的に配置します。
  * - `readOnly={true}` が指定された場合、ユーザーによる編集を制限し、読み取り専用スタイルの視覚フィードバックを適用します。
-* - アクセシビリティ対応として `aria-invalid` および `htmlFor`/`id` の紐付けを行っています。
+ * - アクセシビリティ対応として `aria-invalid` および `htmlFor`/`id` の紐付けを行っています。
+ * - `...props` 経由で `onChangeCapture` などの属性を内部の Input 要素へそのままバケツリレーします。
  */
 const ControlledInput = <T extends FieldValues>({
   control,
@@ -48,6 +52,9 @@ const ControlledInput = <T extends FieldValues>({
   placeholder,
   autoComplete,
   readOnly = false,
+  className,
+  onChange,
+  ...props
 }: ControlledInputProps<T>) => {
   // パスワードの表示/非表示状態を管理する State
   const [showPassword, setShowPassword] = useState(false);
@@ -67,25 +74,36 @@ const ControlledInput = <T extends FieldValues>({
         <Field data-invalid={fieldState.invalid} className="gap-1.5">
           {/* font-semibold から font-medium に少し落とし、エラー時もラベルの色を落ち着かせる */}
           {/* <FieldLabel htmlFor={`field-${name}`} className={"font-semibold"}> */}
-          <FieldLabel htmlFor={`field-${name}`} className="font-medium text-xs text-foreground">
-            {label}
-          </FieldLabel>
+          {label && (
+            <FieldLabel htmlFor={`field-${name}`} className="font-medium text-xs text-foreground">
+              {label}
+            </FieldLabel>
+          )}
 
           {/* アイコンを右端に絶対配置するため relative のラッパーを配置 */}
           <div className="relative">
             <Input
               {...field}
+              {...props}
               id={`field-${name}`}
               type={actualType}
               aria-invalid={fieldState.invalid}
               placeholder={placeholder}
               autoComplete={autoComplete}
+              readOnly={readOnly}
+              onChange={(e) => {
+                field.onChange(e);
+                if (onChange) {
+                  onChange(e);
+                }
+              }}
               // パスワード型の場合はアイコンと重ならないよう右側に余白（pr-10）を確保
               className={`
                 /* フォーカス時のリングの太さを細く統一（1px） */
                 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0
                 ${isPasswordType ? "pr-10" : ""}
                 ${readOnly ? "bg-muted/50 cursor-not-allowed select-none focus-visible:ring-0" : ""}
+                ${className ?? ""}
               `.trim()}
             />
 

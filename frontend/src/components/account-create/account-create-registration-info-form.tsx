@@ -5,8 +5,9 @@ import ControlledInput from "@/components/ui/controlled-input";
 import ControlledSelect from "@/components/ui/controlled-select";
 import FormSectionHeader from "@/components/common/form/form-section-header";
 import FormRow1Col from "@/components/common/form/form-row-1col";
-import AgencyCodeInput from "@/components/common/form/form-agency-code-input";
+import FormAgencyCodeInput from "@/components/common/form/form-agency-code-input";
 import { ROLE_OPTIONS } from "@/constants/role-constant";
+import { useAgencySearch } from "@/hooks/use-agency-search";
 
 /**
  * AccountCreateRegistrationInfoForm コンポーネントの Props 定義
@@ -15,8 +16,6 @@ type AccountCreateRegistrationInfoFormProps = {
   /** React Hook Form の form インスタンス */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
-  /** 取得・紐付けされた代理店名（AgencyCodeInputへ受け渡し） */
-  agencyName?: string;
 };
 
 /**
@@ -31,8 +30,24 @@ type AccountCreateRegistrationInfoFormProps = {
  */
 export const AccountCreateRegistrationInfoForm = ({
   form,
-  agencyName,
 }: AccountCreateRegistrationInfoFormProps) => {
+  const { agencyName, isSearchingAgency, searchAgency } = useAgencySearch();
+
+  /**
+   * 代理店コードの入力時にリアルタイムで代理店名を取得するハンドラー
+   *
+   * @param e - フォームの値が変更された際のイベントオブジェクト
+   */
+  const handleChangeCaptureAgency = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const agencyCode = e.target.value;
+    searchAgency(agencyCode);
+  }
+
+  // 代理店名の表示用テキストの判定
+  const displayAgencyName = isSearchingAgency
+    ? "該当する代理店を探しています..."
+    : agencyName;
+  
   return (
     <div className="space-y-2">
       {/* セクションヘッダー（タイトル: 登録情報 / バッジ: 必須） */}
@@ -77,11 +92,13 @@ export const AccountCreateRegistrationInfoForm = ({
 
         {/* 所属代理店 */}
         <FormRow1Col label="所属代理店" contentClassName="p-3">
-          <AgencyCodeInput
+          <FormAgencyCodeInput
             control={form.control}
             name="agencyCode"
-            agencyName={agencyName}
+            agencyName={displayAgencyName}
             placeholder="代理店コード（半角英数字6桁）"
+            maxLength={6}
+            onChangeCapture={(e) => handleChangeCaptureAgency(e)}
           />
         </FormRow1Col>
 

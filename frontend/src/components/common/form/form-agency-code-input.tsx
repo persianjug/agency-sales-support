@@ -2,6 +2,7 @@
 
 import { Control, FieldValues, Path, useWatch } from "react-hook-form";
 import ControlledInput from "@/components/ui/controlled-input";
+import { ComponentPropsWithoutRef } from "react";
 
 /**
  * FormAgencyCodeInput コンポーネントの Props 型定義
@@ -19,7 +20,7 @@ type FormAgencyCodeInputProps<T extends FieldValues> = {
   placeholder?: string;
   /** 入力不可状態フラグ */
   disabled?: boolean;
-};
+} & ComponentPropsWithoutRef<"input">;
 
 /**
  * 代理店コード入力 ＋ 代理店名表示コンポーネント
@@ -38,12 +39,13 @@ export const FormAgencyCodeInput = <T extends FieldValues>({
   agencyName,
   placeholder = "代理店コードを入力",
   disabled = false,
+  ...props
 }: FormAgencyCodeInputProps<T>) => {
   // コードのリアルタイム入力を監視（必要に応じて連携ロジックに使用可能）
-  const codeValue = useWatch({
-    control,
-    name,
-  });
+  // const codeValue = useWatch({
+  //   control,
+  //   name,
+  // });
 
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -54,18 +56,17 @@ export const FormAgencyCodeInput = <T extends FieldValues>({
           name={name}
           placeholder={placeholder}
           disabled={disabled}
+          {...props}
         />
       </div>
 
       {/* 代理店名表示エリア */}
-      <div className="flex items-center min-h-[40px] px-3 py-2 bg-muted/40 rounded-md border text-sm w-full sm:w-auto min-w-[200px]">
+      <div className="flex items-center min-h-[40px] px-3 py-2 text-sm w-full sm:w-auto min-w-[200px]">
         {agencyName ? (
-          <span className="font-medium text-foreground">{agencyName}</span>
+          <span className="text-foreground">{agencyName}</span>
         ) : (
           <span className="text-muted-foreground text-xs">
-            {codeValue
-              ? "該当する代理店を探しています..."
-              : "※コード入力後に代理店名が表示されます"}
+            ※コード入力後に代理店名が表示されます
           </span>
         )}
       </div>
