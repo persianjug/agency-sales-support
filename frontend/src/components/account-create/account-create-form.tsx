@@ -19,7 +19,7 @@ type AccountCreateFormProps = {
  *
  * @returns JSX.Element - アカウント作成画面UI
  */
-const AccountCreateForm = ({certifications, specialties}: AccountCreateFormProps) => {
+const AccountCreateForm = ({ certifications, specialties }: AccountCreateFormProps) => {
   const { form, handleSubmit, isSubmitting } = useAccountCreateForm();
 
   return (
@@ -29,10 +29,14 @@ const AccountCreateForm = ({certifications, specialties}: AccountCreateFormProps
         <AccountCreateLoginInfoForm form={form} />
 
         {/* 登録情報の編集 */}
-        <AccountCreateRegistrationInfoForm form={form} agencyName="" />
+        <AccountCreateRegistrationInfoForm form={form} />
 
         {/* 連絡先・営業属性の編集 */}
-        <AccountCreateSalesAttributeForm form={form} certificationsMast={certifications} specialtiesMast={specialties} />
+        <AccountCreateSalesAttributeForm
+          form={form}
+          certificationsMast={certifications}
+          specialtiesMast={specialties}
+        />
 
         {/* フッター：ボタン */}
         <AccountCreateFooter isSubmitting={isSubmitting} />
